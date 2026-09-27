@@ -1,0 +1,13 @@
+[project]
+name = "llm-model-atlas"
+version = "0.1.0"
+description = "Tiny CPU architecture comparisons for model-family case studies"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.3,<3"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["atlas*"]
