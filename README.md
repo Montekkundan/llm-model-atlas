@@ -16,10 +16,10 @@ python -c 'import json; c=json.load(open("catalog/model_families.json")); print(
 
 | Preset | Mechanisms actually executed | Source | Deliberate simplifications |
 | --- | --- | --- | --- |
-| `olmo2` | Dense MHA, QK RMSNorm, adjacent-pair RoPE, output-side/reordered RMSNorm, SwiGLU, full causal attention | [OLMo 2 report, §§2.1 and 3.3.2](https://arxiv.org/html/2501.00656) | Tiny 32-wide/two-layer text model; toy 64-token vocabulary; no OLMo tokenizer, official weights, z-loss, real data, or training recipe. This preset represents an MHA-sized OLMo 2 variant, not the later 32B GQA scale. |
-| `gemma3` | GQA, QK RMSNorm, adjacent-pair RoPE, pre-and-post RMSNorm, a five-local/one-global attention schedule, distinct local/global RoPE bases | [Gemma 3 report, §2](https://arxiv.org/html/2503.19786) | Tiny 32-wide/six-layer text model; four-token local window instead of the report's 1,024; toy vocabulary; no vision encoder, real tokenizer, distillation, official weights, or full training recipe. |
+| `olmo2` | Dense MHA, full-projection QK RMSNorm, adjacent-pair RoPE, output-side/reordered RMSNorm, SwiGLU, full causal attention | [OLMo 2 report, §§2.1 and 3.3.2](https://arxiv.org/html/2501.00656) | Tiny 32-wide/two-layer text model; toy 64-token vocabulary; no OLMo tokenizer, official weights, z-loss, real data, or training recipe. This preset represents an MHA-sized OLMo 2 variant, not the later 32B GQA scale. |
+| `gemma3` | GQA, headwise QK RMSNorm, adjacent-pair RoPE, pre-and-post RMSNorm, GeGLU, a five-local/one-global attention schedule, distinct local/global RoPE bases | [Gemma 3 report, §2](https://arxiv.org/html/2503.19786) | Tiny 32-wide/six-layer text model; four-token local window instead of the report's 1,024; toy vocabulary; no vision encoder, real tokenizer, distillation, official weights, or full training recipe. |
 
-The OLMo 2 paper describes output-side/reordered normalization and QK norm; Gemma 3 describes GQA, pre/post norms, a 5:1 local/global pattern, 1,024-token local windows, and different local/global RoPE bases. The preset files name those sources and carry `schema_version=1`. Their validation rejects unsupported families and illegal head/schedule combinations. The only currently implemented family slugs are `olmo2` and `gemma3`; the [lesson map](LESSON_MAP.md) marks the other 21 family case studies unimplemented.
+The OLMo 2 paper describes output-side/reordered normalization and QK norm; Gemma 3 describes GQA, pre/post norms, a 5:1 local/global pattern, 1,024-token local windows, and different local/global RoPE bases. The preset files name those sources and carry `schema_version=2`, with explicit `qk_norm_axis` and `gate_activation` fields. Version 1 presets are rejected because they do not specify these mechanisms. Validation rejects unsupported families and incompatible field combinations. The only currently implemented family slugs are `olmo2` and `gemma3`; the [lesson map](LESSON_MAP.md) marks the other 21 family case studies unimplemented.
 
 Both tiny paths intentionally tie embedding and output weights, omit biases in the projections, use a tiny synthetic token vocabulary, and perform full-sequence attention. These choices make a compact comparison, but they cannot be loaded from official checkpoints or used to claim published-model parity. The local window is enforced in a dense mask: this checks visibility, **not** the memory or speed of an optimized sliding-window kernel.
 
@@ -43,11 +43,13 @@ The tests check validated schema, distinct block styles and attention schedules,
 
 ### Verification record
 
-On 27 September 2026, the seven unit tests passed with Python 3.12 and cached PyTorch 2.13.0 on CPU. Each demo completed two synthetic optimizer steps. `olmo2` printed losses 14.5915 and 11.1278, `trainable_parameters=22720`, and `analytical_raw_kv_bytes_at_32_tokens=16384`; `gemma3` printed losses 12.0554 and 6.7070, `trainable_parameters=58240`, and `analytical_raw_kv_bytes_at_32_tokens=6656`. Those counts and losses describe only these tiny configurations and fixed random batch. No GPU profiling, dataset evaluation, or official checkpoint verification was performed.
+On 27 September 2026, all 11 unit tests passed with Python 3.11.13 and PyTorch 2.9.1 on CPU. Each demo completed two synthetic optimizer steps. `olmo2` printed losses 14.6823 and 11.3558, `trainable_parameters=22816`, and `analytical_raw_kv_bytes_at_32_tokens=16384`; `gemma3` printed losses 12.4655 and 6.8729, `trainable_parameters=58240`, and `analytical_raw_kv_bytes_at_32_tokens=6656`. Those counts and losses describe only these tiny configurations and fixed random batch. No GPU profiling, dataset evaluation, or official checkpoint verification was performed.
 
 ## Primary references
 
 - Team OLMo. [2 OLMo 2 Furious](https://arxiv.org/abs/2501.00656), especially §§2.1 and 3.3.2 for architecture choices.
+- AllenAI. [OLMo model code](https://github.com/allenai/OLMo/blob/main/olmo/model.py), for full-projection Q/K normalization before head reshaping.
 - Gemma Team. [Gemma 3 Technical Report](https://arxiv.org/abs/2503.19786), especially §2 for GQA and local/global schedule.
+- Google. [Gemma PyTorch model code](https://github.com/google/gemma_pytorch/blob/main/gemma/model.py), for headwise Q/K normalization and the tanh-approximate GELU gate.
 - Ainslie et al. [GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints](https://arxiv.org/abs/2305.13245), for KV-head sharing semantics.
 - Su et al. [RoFormer: Enhanced Transformer with Rotary Position Embedding](https://arxiv.org/abs/2104.09864), for rotary query/key positions.

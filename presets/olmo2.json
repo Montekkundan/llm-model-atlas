@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "family": "olmo2_text_tiny",
   "source_url": "https://arxiv.org/abs/2501.00656",
   "source_revision": "2 OLMo 2 Furious, Section 2.1 and Section 3.3.2; MHA-sized teaching path",
@@ -16,5 +16,7 @@
   "rope_base_global": 500000.0,
   "rope_base_local": 500000.0,
   "block_style": "reordered_output_norm",
-  "qk_norm": true
+  "qk_norm": true,
+  "qk_norm_axis": "projection",
+  "gate_activation": "silu"
 }

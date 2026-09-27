@@ -15,19 +15,21 @@ class AtlasTests(unittest.TestCase):
     def test_two_distinct_source_backed_specs(self):
         olmo = load_preset("olmo2")
         gemma = load_preset("gemma3")
-        self.assertEqual(olmo.schema_version, 1)
-        self.assertEqual(gemma.schema_version, 1)
+        self.assertEqual(olmo.schema_version, 2)
+        self.assertEqual(gemma.schema_version, 2)
         self.assertEqual(olmo.block_style, "reordered_output_norm")
         self.assertEqual(gemma.block_style, "pre_and_post_norm")
         self.assertEqual(olmo.attention_schedule, ("global", "global"))
         self.assertEqual(gemma.attention_schedule, ("local",) * 5 + ("global",))
         self.assertEqual((olmo.query_heads, olmo.kv_heads), (4, 4))
         self.assertEqual((gemma.query_heads, gemma.kv_heads), (4, 2))
+        self.assertEqual((olmo.qk_norm_axis, olmo.gate_activation), ("projection", "silu"))
+        self.assertEqual((gemma.qk_norm_axis, gemma.gate_activation), ("head", "gelu"))
 
     def test_invalid_presets_fail_before_construction(self):
         olmo = load_preset("olmo2")
         with self.assertRaisesRegex(ValueError, "schema"):
-            replace(olmo, schema_version=2).validate()
+            replace(olmo, schema_version=1).validate()
         with self.assertRaisesRegex(ValueError, "head width"):
             replace(olmo, width=33).validate()
         with self.assertRaisesRegex(ValueError, "schedule"):
@@ -38,6 +40,12 @@ class AtlasTests(unittest.TestCase):
             replace(olmo, source_url="https://example.org").validate()
         with self.assertRaisesRegex(ValueError, "requires GQA"):
             replace(load_preset("gemma3"), kv_heads=4).validate()
+        with self.assertRaisesRegex(ValueError, "QK norm"):
+            replace(olmo, qk_norm_axis="head").validate()
+        with self.assertRaisesRegex(ValueError, "gate activation"):
+            replace(load_preset("gemma3"), gate_activation="silu").validate()
+        with self.assertRaisesRegex(ValueError, "QK norm"):
+            replace(olmo, qk_norm_axis="invalid").validate()
         with self.assertRaises(ValueError):
             load_preset("deepseek_v3")
         raw = dict(vars(olmo), unexpected_field=True)
@@ -58,6 +66,28 @@ class AtlasTests(unittest.TestCase):
         x = torch.randn(2, 7, 4, 8)
         rotated = apply_rope(x, 500000.0)
         torch.testing.assert_close(rotated.norm(dim=-1), x.norm(dim=-1), rtol=1e-5, atol=1e-5)
+
+    def test_family_specific_qk_normalization_axes(self):
+        olmo = GroupedAttention(load_preset("olmo2"), "global")
+        gemma = GroupedAttention(load_preset("gemma3"), "global")
+        self.assertEqual(tuple(olmo.q_norm.weight.shape), (olmo.query_heads * olmo.head_width,))
+        self.assertEqual(tuple(olmo.k_norm.weight.shape), (olmo.kv_heads * olmo.head_width,))
+        self.assertEqual(tuple(gemma.q_norm.weight.shape), (gemma.head_width,))
+        self.assertEqual(tuple(gemma.k_norm.weight.shape), (gemma.head_width,))
+
+        projected = torch.randn(2, 3, olmo.query_heads * olmo.head_width)
+        normalized = olmo.q_norm(projected)
+        expected = projected * torch.rsqrt(projected.square().mean(-1, keepdim=True) + olmo.q_norm.eps)
+        torch.testing.assert_close(normalized, expected)
+
+    def test_family_specific_gated_mlp_activation(self):
+        for family, gate_activation in (("olmo2", lambda x: F.silu(x)),
+                                        ("gemma3", lambda x: F.gelu(x, approximate="tanh"))):
+            with self.subTest(family=family):
+                ffn = TinyLanguageModel(load_preset(family)).blocks[0].ffn
+                x = torch.randn(2, 3, ffn.gate.in_features)
+                expected = ffn.down(gate_activation(ffn.gate(x)) * ffn.up(x))
+                torch.testing.assert_close(ffn(x), expected)
 
     def test_local_attention_changes_the_actual_forward(self):
         spec = load_preset("gemma3")

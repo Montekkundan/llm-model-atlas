@@ -29,6 +29,8 @@ class ModelSpec:
     rope_base_local: float
     block_style: str
     qk_norm: bool
+    qk_norm_axis: str
+    gate_activation: str
 
     @classmethod
     def from_dict(cls, raw: dict) -> "ModelSpec":
@@ -40,7 +42,7 @@ class ModelSpec:
         return spec
 
     def validate(self) -> None:
-        if self.schema_version != 1:
+        if self.schema_version != 2:
             raise ValueError("unknown spec schema")
         if self.family not in {"olmo2_text_tiny", "gemma3_text_tiny"}:
             raise ValueError("unsupported family")
@@ -71,11 +73,19 @@ class ModelSpec:
             raise ValueError("RoPE bases must exceed one")
         if not self.qk_norm:
             raise ValueError("both supported text paths require QK norm")
+        if self.qk_norm_axis not in {"projection", "head"}:
+            raise ValueError("unknown QK norm axis")
+        if self.gate_activation not in {"silu", "gelu"}:
+            raise ValueError("unknown gate activation")
         if self.family == "olmo2_text_tiny":
             if self.block_style != "reordered_output_norm" or set(self.attention_schedule) != {"global"}:
                 raise ValueError("OLMo 2 teaching path requires output norms and global attention")
             if self.query_heads != self.kv_heads:
                 raise ValueError("this OLMo 2 teaching preset models the MHA variants")
+            if self.qk_norm_axis != "projection":
+                raise ValueError("OLMo 2 requires full-projection QK norm")
+            if self.gate_activation != "silu":
+                raise ValueError("OLMo 2 requires SiLU gate activation")
         if self.family == "gemma3_text_tiny":
             if self.block_style != "pre_and_post_norm" or self.attention_schedule != (
                 "local", "local", "local", "local", "local", "global"
@@ -83,6 +93,10 @@ class ModelSpec:
                 raise ValueError("Gemma 3 teaching path requires a 5:1 local/global cycle")
             if not self.kv_heads < self.query_heads:
                 raise ValueError("this Gemma 3 teaching preset requires GQA")
+            if self.qk_norm_axis != "head":
+                raise ValueError("Gemma 3 requires headwise QK norm")
+            if self.gate_activation != "gelu":
+                raise ValueError("Gemma 3 requires GELU gate activation")
 
 
 def load_preset(name: str) -> ModelSpec:

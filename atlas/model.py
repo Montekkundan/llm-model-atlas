@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from typing import Literal
 
 import torch
 from torch import Tensor, nn
@@ -53,20 +54,29 @@ class GroupedAttention(nn.Module):
         self.query_heads = spec.query_heads
         self.kv_heads = spec.kv_heads
         self.head_width = spec.width // spec.query_heads
+        self.full_projection_qk_norm = spec.qk_norm_axis == "projection"
         self.window = spec.local_window if kind == "local" else None
         self.rope_base = spec.rope_base_local if kind == "local" else spec.rope_base_global
         self.q_proj = nn.Linear(spec.width, spec.query_heads * self.head_width, bias=False)
         self.k_proj = nn.Linear(spec.width, spec.kv_heads * self.head_width, bias=False)
         self.v_proj = nn.Linear(spec.width, spec.kv_heads * self.head_width, bias=False)
         self.out_proj = nn.Linear(spec.width, spec.width, bias=False)
-        self.q_norm = RMSNorm(self.head_width)
-        self.k_norm = RMSNorm(self.head_width)
+        q_norm_width = spec.query_heads * self.head_width if self.full_projection_qk_norm else self.head_width
+        k_norm_width = spec.kv_heads * self.head_width if self.full_projection_qk_norm else self.head_width
+        self.q_norm = RMSNorm(q_norm_width)
+        self.k_norm = RMSNorm(k_norm_width)
 
     def forward(self, x: Tensor) -> Tensor:
         batch, tokens, width = x.shape
         dh = self.head_width
-        q = self.q_norm(self.q_proj(x).reshape(batch, tokens, self.query_heads, dh))
-        k = self.k_norm(self.k_proj(x).reshape(batch, tokens, self.kv_heads, dh))
+        q = self.q_proj(x)
+        k = self.k_proj(x)
+        if self.full_projection_qk_norm:
+            q, k = self.q_norm(q), self.k_norm(k)
+        q = q.reshape(batch, tokens, self.query_heads, dh)
+        k = k.reshape(batch, tokens, self.kv_heads, dh)
+        if not self.full_projection_qk_norm:
+            q, k = self.q_norm(q), self.k_norm(k)
         v = self.v_proj(x).reshape(batch, tokens, self.kv_heads, dh)
         q = apply_rope(q, self.rope_base).transpose(1, 2)
         k = apply_rope(k, self.rope_base).transpose(1, 2)
@@ -82,15 +92,20 @@ class GroupedAttention(nn.Module):
         return self.out_proj(output)
 
 
-class SwiGLU(nn.Module):
-    def __init__(self, width: int, hidden: int):
+class GatedMLP(nn.Module):
+    def __init__(self, width: int, hidden: int, gate_activation: Literal["silu", "gelu"]):
         super().__init__()
         self.gate = nn.Linear(width, hidden, bias=False)
         self.up = nn.Linear(width, hidden, bias=False)
         self.down = nn.Linear(hidden, width, bias=False)
+        self.gate_activation = gate_activation
 
     def forward(self, x: Tensor) -> Tensor:
-        return self.down(F.silu(self.gate(x)) * self.up(x))
+        gate = self.gate(x)
+        activated = (
+            F.gelu(gate, approximate="tanh") if self.gate_activation == "gelu" else F.silu(gate)
+        )
+        return self.down(activated * self.up(x))
 
 
 class DecoderBlock(nn.Module):
@@ -98,7 +113,7 @@ class DecoderBlock(nn.Module):
         super().__init__()
         self.style = spec.block_style
         self.attention = GroupedAttention(spec, kind)
-        self.ffn = SwiGLU(spec.width, spec.ff_hidden)
+        self.ffn = GatedMLP(spec.width, spec.ff_hidden, spec.gate_activation)
         self.attention_input_norm = RMSNorm(spec.width) if self.style == "pre_and_post_norm" else nn.Identity()
         self.ffn_input_norm = RMSNorm(spec.width) if self.style == "pre_and_post_norm" else nn.Identity()
         self.attention_output_norm = RMSNorm(spec.width)

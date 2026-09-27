@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "family": "gemma3_text_tiny",
   "source_url": "https://arxiv.org/abs/2503.19786",
   "source_revision": "Gemma 3 Technical Report, Section 2; text-only 5:1 local/global teaching path",
@@ -16,5 +16,7 @@
   "rope_base_global": 1000000.0,
   "rope_base_local": 10000.0,
   "block_style": "pre_and_post_norm",
-  "qk_norm": true
+  "qk_norm": true,
+  "qk_norm_axis": "head",
+  "gate_activation": "gelu"
 }
