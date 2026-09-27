@@ -2,6 +2,16 @@
 
 This is a standalone **student project starter** for the model-family case studies in lectures 51–73. It shows how one `TinyLanguageModel` and one synthetic training loop can select two distinct, validated text-path mechanisms by preset. The presets are scaled teaching designs, **not** published-model configurations, pretrained weights, or checkpoint-compatible reproductions.
 
+## Find a case study
+
+The [lesson map](LESSON_MAP.md) is the short reading guide. The [machine-readable catalog](catalog/model_families.json) has one card for each of the 23 proposed lessons, in lesson order, with the title and slug, mechanisms to investigate, source URLs, and `implementationStatus`. A card marked `documented_pending` is a research/implementation target, not an executable model. Lesson 72 is a survey of releases, not a single model family. Only lessons 52 and 53 are marked `runnable_tiny_text_path`, and those statuses refer solely to the small teaching paths below.
+
+To look up one card without installing another package:
+
+```bash
+python -c 'import json; c=json.load(open("catalog/model_families.json")); print(next(x for x in c["cards"] if x["lessonNumber"] == 62))'
+```
+
 ## What runs today
 
 | Preset | Mechanisms actually executed | Source | Deliberate simplifications |

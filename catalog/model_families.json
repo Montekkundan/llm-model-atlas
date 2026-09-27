@@ -1,0 +1,647 @@
+{
+  "schemaVersion": 1,
+  "catalogTitle": "Model-family case studies, lectures 51–73",
+  "curriculumSource": "m-26/content/lectures/syllabus.json, proposed curriculum snapshot of 2026-09-27",
+  "statusSemantics": {
+    "runnable_tiny_text_path": "An original scaled CPU teaching path is implemented; no released-model parity or checkpoint compatibility is claimed.",
+    "documented_pending": "The case study is cataloged from sources; no family-specific executable path is implemented here."
+  },
+  "cards": [
+    {
+      "lessonNumber": 51,
+      "lessonTitle": "DeepSeek V3 and R1: one architecture, different training goals",
+      "lessonSlug": "deepseek-v3-r1-architecture-training-goals",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "MLA latent KV representation and decoupled position path",
+        "Fine-grained routed experts and shared experts",
+        "Multi-token prediction; distinguish V3 pretraining architecture from R1 post-training"
+      ],
+      "sources": [
+        {
+          "title": "DeepSeek-V3 Technical Report",
+          "url": "https://arxiv.org/html/2412.19437"
+        },
+        {
+          "title": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
+          "url": "https://arxiv.org/html/2501.12948"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 52,
+      "lessonTitle": "OLMo 2: what does post-norm and QK norm buy?",
+      "lessonSlug": "olmo-2-post-norm-qk-norm",
+      "kind": "model_family_case_study",
+      "implementationStatus": "runnable_tiny_text_path",
+      "runnablePreset": "olmo2",
+      "implementationNote": "An original scaled teaching text path, not published weights, config, tokenizer, or full training recipe.",
+      "definingMechanisms": [
+        "Output-side/reordered RMSNorm and QK normalization",
+        "Dense multi-head causal attention in the tiny executable path",
+        "Controlled comparison of normalization placement"
+      ],
+      "sources": [
+        {
+          "title": "2 OLMo 2 Furious",
+          "url": "https://arxiv.org/html/2501.00656"
+        },
+        {
+          "title": "Primary paper",
+          "url": "https://arxiv.org/abs/1910.07467"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 53,
+      "lessonTitle": "Gemma 3: local attention inside a global model",
+      "lessonSlug": "gemma-3-local-global-attention",
+      "kind": "model_family_case_study",
+      "implementationStatus": "runnable_tiny_text_path",
+      "runnablePreset": "gemma3",
+      "implementationNote": "An original scaled teaching text path, not published weights, config, tokenizer, or full training recipe.",
+      "definingMechanisms": [
+        "Grouped-query attention with QK normalization",
+        "Five local attention layers per global attention layer in the tiny executable path",
+        "Distinct local/global RoPE bases and pre/post normalization"
+      ],
+      "sources": [
+        {
+          "title": "Gemma 3 Technical Report",
+          "url": "https://arxiv.org/html/2503.19786"
+        },
+        {
+          "title": "Official configuration",
+          "url": "https://github.com/google/gemma_pytorch/blob/main/gemma/config.py"
+        },
+        {
+          "title": "Official implementation",
+          "url": "https://github.com/google/gemma_pytorch/blob/main/gemma/model.py"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 54,
+      "lessonTitle": "Mistral Small 3.1: inspect a modern dense release",
+      "lessonSlug": "mistral-small-3-1-dense-release",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published dense text configuration",
+        "Tokenizer, head grouping, context and feed-forward settings require source audit"
+      ],
+      "sources": [
+        {
+          "title": "Official announcement",
+          "url": "https://mistral.ai/news/mistral-small-3-1/"
+        },
+        {
+          "title": "Official released configuration",
+          "url": "https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/blob/main/config.json"
+        },
+        {
+          "title": "Official base configuration",
+          "url": "https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Base-2503/blob/main/config.json"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 55,
+      "lessonTitle": "Llama 4: dense-to-sparse family design",
+      "lessonSlug": "llama-4-dense-sparse-family",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published sparse MoE choices",
+        "Attention and multimodal versus text-only boundaries require source audit"
+      ],
+      "sources": [
+        {
+          "title": "Official announcement",
+          "url": "https://ai.meta.com/blog/llama-4-multimodal-intelligence/"
+        },
+        {
+          "title": "Official model card",
+          "url": "https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 56,
+      "lessonTitle": "Qwen3: one family, dense and MoE variants",
+      "lessonSlug": "qwen3-one-family-dense-and-moe-variants",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Compare dense and sparse variants within the Qwen3 family",
+        "Routed-expert count versus active compute; audit official configurations"
+      ],
+      "sources": [
+        {
+          "title": "Qwen Team, *Qwen3 Technical Report*, 2025",
+          "url": "https://arxiv.org/abs/2505.09388"
+        },
+        {
+          "title": "Qwen, *Qwen3-4B config.json*, model repository, accessed 2026",
+          "url": "https://huggingface.co/Qwen/Qwen3-4B/blob/main/config.json"
+        },
+        {
+          "title": "Qwen, *Qwen3-30B-A3B config.json*, model repository, accessed 2026",
+          "url": "https://huggingface.co/Qwen/Qwen3-30B-A3B/blob/main/config.json"
+        },
+        {
+          "title": "Qwen, *Qwen3-30B-A3B model card*, accessed 2026",
+          "url": "https://huggingface.co/Qwen/Qwen3-30B-A3B"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 57,
+      "lessonTitle": "SmolLM3: positional information need not be uniform",
+      "lessonSlug": "smollm3-positional-information-need-not-be-uniform",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published positional schedule, including any documented NoPE layers",
+        "Separate position choice from head and context changes"
+      ],
+      "sources": [
+        {
+          "title": "Hugging Face Smol Models Research, *SmolLM3: smol, multilingual, long-context reasoner*, 2025",
+          "url": "https://huggingface.co/blog/smollm3"
+        },
+        {
+          "title": "HuggingFaceTB, *SmolLM3-3B-Base config.json*, model repository, accessed 2026",
+          "url": "https://huggingface.co/HuggingFaceTB/SmolLM3-3B-Base/blob/main/config.json"
+        },
+        {
+          "title": "Su et al., *RoFormer: Enhanced Transformer with Rotary Position Embedding*, 2021",
+          "url": "https://arxiv.org/abs/2104.09864"
+        },
+        {
+          "title": "Hugging Face Transformers issue #43756, *SmolLM3 drops 3/4 RoPE layers while 1/4 is intended*, 2026",
+          "url": "https://github.com/huggingface/transformers/issues/43756"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 58,
+      "lessonTitle": "Kimi K2 and K2 Thinking: architecture versus reasoning recipe",
+      "lessonSlug": "kimi-k2-architecture-versus-reasoning-recipe",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "DeepSeek-derived MLA and expert-structure comparison where documented",
+        "Separate Kimi K2 base architecture from K2 Thinking post-training"
+      ],
+      "sources": [
+        {
+          "title": "Kimi Team, *Kimi K2: Open Agentic Intelligence*, 2025",
+          "url": "https://arxiv.org/abs/2507.20534"
+        },
+        {
+          "title": "Moonshot AI, *Kimi-K2 repository and model summary*, accessed 2026",
+          "url": "https://github.com/MoonshotAI/Kimi-K2"
+        },
+        {
+          "title": "Moonshot AI, *Kimi-K2-Instruct config.json*, accessed 2026",
+          "url": "https://huggingface.co/moonshotai/Kimi-K2-Instruct/blob/main/config.json"
+        },
+        {
+          "title": "Moonshot AI, *Kimi-K2 deployment guidance*, accessed 2026",
+          "url": "https://github.com/MoonshotAI/Kimi-K2/blob/main/docs/deploy_guidance.md"
+        },
+        {
+          "title": "Moonshot AI, *Kimi-K2-Thinking model card*, accessed 2026",
+          "url": "https://huggingface.co/moonshotai/Kimi-K2-Thinking"
+        },
+        {
+          "title": "Moonshot AI, *Kimi-K2-Thinking config.json*, accessed 2026",
+          "url": "https://huggingface.co/moonshotai/Kimi-K2-Thinking/blob/main/config.json"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 59,
+      "lessonTitle": "GPT-OSS: inspect an open-weight MoE design",
+      "lessonSlug": "gpt-oss-inspect-an-open-weight-moe-design",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published open-weight MoE routing and attention contracts",
+        "Audit released configurations before a runnable preset"
+      ],
+      "sources": [
+        {
+          "title": "OpenAI, *gpt-oss-120b & gpt-oss-20b Model Card*, 2025",
+          "url": "https://deploymentsafety.openai.com/gpt-oss/a2"
+        },
+        {
+          "title": "OpenAI, *Introducing gpt-oss*, 2025",
+          "url": "https://openai.com/index/introducing-gpt-oss/"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 60,
+      "lessonTitle": "Grok 2.5: compare another sparse family",
+      "lessonSlug": "grok-25-compare-another-sparse-family",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Public configuration and model-card audit",
+        "Expert, attention and position choices remain to be confirmed before implementation"
+      ],
+      "sources": [
+        {
+          "title": "xAI, *Grok 2 model card*, model repository, accessed 2026",
+          "url": "https://huggingface.co/xai-org/grok-2"
+        },
+        {
+          "title": "xAI, *grok-2 config.json*, model repository, accessed 2026",
+          "url": "https://huggingface.co/xai-org/grok-2/blob/main/config.json"
+        },
+        {
+          "title": "xAI, *Grok-1 open release*, 2024",
+          "url": "https://github.com/xai-org/grok-1"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 61,
+      "lessonTitle": "GLM-4.5: architecture and training choices in one report",
+      "lessonSlug": "glm-4-5-architecture-and-training",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published text architecture and MoE configuration",
+        "Separate structural choices from training and reasoning recipe"
+      ],
+      "sources": [
+        {
+          "title": "GLM-4.5 Team, *GLM-4.5: Agentic, Reasoning, and Coding (ARC) Foundation Models*, 2025, §2.1 and Table 1",
+          "url": "https://arxiv.org/html/2508.06471"
+        },
+        {
+          "title": "Z.ai, *GLM-4.5 checkpoint configuration*, inspected September 2026",
+          "url": "https://huggingface.co/zai-org/GLM-4.5/blob/main/config.json"
+        },
+        {
+          "title": "Z.ai, *GLM-4.5-Air checkpoint configuration*, inspected September 2026",
+          "url": "https://huggingface.co/zai-org/GLM-4.5-Air/blob/main/config.json"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 62,
+      "lessonTitle": "Qwen3-Next: gated DeltaNet beside attention",
+      "lessonSlug": "qwen3-next-gated-deltanet-beside-attention",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Hybrid gated DeltaNet recurrent state and attention schedule",
+        "Multi-token prediction; test recurrent step/sequence parity before implementation claim"
+      ],
+      "sources": [
+        {
+          "title": "Qwen Team, *Qwen3-Next-80B-A3B-Instruct model card*, 2025, architecture section",
+          "url": "https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct"
+        },
+        {
+          "title": "Qwen Team, *Qwen3-Next-80B-A3B-Instruct configuration*, inspected September 2026",
+          "url": "https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct/blob/main/config.json"
+        },
+        {
+          "title": "Yang et al., *Gated Delta Networks: Improving Mamba2 with Delta Rule*, 2024/2025",
+          "url": "https://arxiv.org/abs/2412.06464"
+        },
+        {
+          "title": "Hugging Face Transformers, *Qwen3-Next model documentation*, inspected September 2026",
+          "url": "https://huggingface.co/docs/transformers/en/model_doc/qwen3_next"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 63,
+      "lessonTitle": "MiniMax-M2: why choose full attention again?",
+      "lessonSlug": "minimax-m2-full-attention",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published full-attention choice",
+        "Compare attention cost assumptions with M1-style efficient-attention design"
+      ],
+      "sources": [
+        {
+          "title": "MiniMax Team, *The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence*, 2026, §§2.1–2.2",
+          "url": "https://arxiv.org/html/2605.26494"
+        },
+        {
+          "title": "MiniMax Team, *MiniMax-M1: Scaling Test-Time Compute Efficiently with Lightning Attention*, 2025",
+          "url": "https://arxiv.org/abs/2506.13585"
+        },
+        {
+          "title": "MiniMaxAI, *MiniMax-M2 checkpoint configuration*, inspected September 2026",
+          "url": "https://huggingface.co/MiniMaxAI/MiniMax-M2/blob/main/config.json"
+        },
+        {
+          "title": "MiniMax pretraining team, *Why Did M2 End Up as a Full Attention Model?*, 2025",
+          "url": "https://www.minimax.io/news/why-did-m2-end-up-as-a-full-attention-model"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 64,
+      "lessonTitle": "Kimi Linear: Kimi Delta Attention plus MLA",
+      "lessonSlug": "kimi-linear-delta-attention-mla",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Kimi Delta Attention recurrent update beside MLA",
+        "Hybrid schedule and inference-state parity requirement"
+      ],
+      "sources": [
+        {
+          "title": "Kimi Team, *Kimi Linear: An Expressive, Efficient Attention Architecture*, 2025, §§3–5",
+          "url": "https://arxiv.org/html/2510.26692"
+        },
+        {
+          "title": "Moonshot AI, *Kimi-Linear-48B-A3B-Base configuration*, inspected September 2026",
+          "url": "https://huggingface.co/moonshotai/Kimi-Linear-48B-A3B-Base/blob/main/config.json"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 65,
+      "lessonTitle": "Olmo 3 Thinking: the base architecture and thinking stage",
+      "lessonSlug": "olmo-3-thinking-base-and-post-training",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Base architecture versus thinking-stage post-training",
+        "Source-backed norm, attention and tokenizer configuration audit"
+      ],
+      "sources": [
+        {
+          "title": "Team Olmo, *Olmo 3*, 2025/2026 revision, §§3–4 and Appendix Table 33",
+          "url": "https://arxiv.org/html/2512.13961"
+        },
+        {
+          "title": "Ai2, *Olmo model-flow release*, inspected September 2026",
+          "url": "https://allenai.org/olmo"
+        },
+        {
+          "title": "Ai2, *Olmo-3-7B-Think checkpoint configuration*, inspected September 2026",
+          "url": "https://huggingface.co/allenai/Olmo-3-7B-Think/blob/main/config.json"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 66,
+      "lessonTitle": "DeepSeek V3.2: sparse attention changes the access pattern",
+      "lessonSlug": "deepseek-v3-2-sparse-attention-changes-the-access-pattern",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published sparse-attention selection/access pattern",
+        "Compare selection and cache semantics against DeepSeek V3 MLA"
+      ],
+      "sources": [
+        {
+          "title": "DeepSeek-AI, *DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models*, 2025, §2.1, Eq. 1–3",
+          "url": "https://arxiv.org/html/2512.02556"
+        },
+        {
+          "title": "DeepSeek-AI, *DeepSeek-V3 Technical Report*, 2024, MLA and MoE baseline",
+          "url": "https://arxiv.org/abs/2412.19437"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 67,
+      "lessonTitle": "Mistral 3: when a family reuses DeepSeek-like structure",
+      "lessonSlug": "mistral-3-when-a-family-reuses-deepseek-like-structure",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published Mistral 3 text configuration",
+        "Identify reusable DeepSeek-like operators and genuine differences through source audit"
+      ],
+      "sources": [
+        {
+          "title": "Mistral AI, *Introducing Mistral 3*, 2025",
+          "url": "https://mistral.ai/news/mistral-3/"
+        },
+        {
+          "title": "Mistral AI, *Mistral-Large-3-675B-Instruct-2512-Eagle model card*, accessed 2026",
+          "url": "https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512-Eagle/blob/main/README.md"
+        },
+        {
+          "title": "Mistral AI, *Mistral-Large-3-675B-Instruct-2512 `params.json`*, accessed 2026; pin a revision for reproducibility",
+          "url": "https://huggingface.co/mistralai/Mistral-Large-3-675B-Instruct-2512/blob/main/params.json"
+        },
+        {
+          "title": "DeepSeek-AI, *DeepSeek-V3 Technical Report*, 2024",
+          "url": "https://arxiv.org/abs/2412.19437"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 68,
+      "lessonTitle": "Nemotron 3 Nano and Super: Mamba-2 and latent experts",
+      "lessonSlug": "nemotron-3-nano-and-super-mamba-2-and-latent-experts",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Mamba-2/recurrent sequence path where documented",
+        "Latent expert routing and state contracts for Nano and Super"
+      ],
+      "sources": [
+        {
+          "title": "NVIDIA, *Nemotron 3 Nano: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning*, 2025, §2.1 and Table 1",
+          "url": "https://arxiv.org/html/2512.20848"
+        },
+        {
+          "title": "NVIDIA, *Nemotron 3 Super: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning*, 2026, §2.1",
+          "url": "https://research.nvidia.com/labs/nemotron/files/NVIDIA-Nemotron-3-Super-Technical-Report.pdf"
+        },
+        {
+          "title": "Tri Dao and Albert Gu, *Transformers are SSMs: Generalized Models and Efficient Algorithms Through Structured State Space Duality*, 2024",
+          "url": "https://arxiv.org/abs/2405.21060"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 69,
+      "lessonTitle": "Xiaomi MiMo-V2-Flash: inspect a fast hybrid release",
+      "lessonSlug": "xiaomi-mimo-v2-flash-inspect-a-fast-hybrid-release",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published hybrid component schedule",
+        "Audit which operators are reused and which are distinct"
+      ],
+      "sources": [
+        {
+          "title": "Xiaomi MiMo team, *MiMo-V2-Flash Technical Report*, 2026, §2 and Eq. 1–4",
+          "url": "https://arxiv.org/html/2601.02780"
+        },
+        {
+          "title": "Joshua Ainslie et al., *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*, 2023",
+          "url": "https://arxiv.org/abs/2305.13245"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 70,
+      "lessonTitle": "Arcee AI Trinity Large: reconstruct another MoE design",
+      "lessonSlug": "arcee-ai-trinity-large-reconstruct-another-moe-design",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published expert routing and attention choices",
+        "Compare total versus active parameter and compute conventions"
+      ],
+      "sources": [
+        {
+          "title": "Arcee AI, *Trinity Large Technical Report*, 2026, §2.2–2.3, Eq. 11–18 and 23–28",
+          "url": "https://arxiv.org/html/2602.17004"
+        },
+        {
+          "title": "Joshua Ainslie et al., *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*, 2023",
+          "url": "https://arxiv.org/abs/2305.13245"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 71,
+      "lessonTitle": "GLM-5: compare a newer frontier text architecture",
+      "lessonSlug": "glm-5-compare-a-newer-frontier-text-architecture",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published GLM-5 text configuration",
+        "Distinguish new mechanisms from scale or training changes"
+      ],
+      "sources": [
+        {
+          "title": "GLM-5: from Vibe Coding to Agentic Engineering",
+          "url": "https://arxiv.org/abs/2602.15763"
+        },
+        {
+          "title": "GLM-5 configuration",
+          "url": "https://huggingface.co/zai-org/GLM-5/blob/main/config.json"
+        },
+        {
+          "title": "GLM-4.5 configuration",
+          "url": "https://huggingface.co/zai-org/GLM-4.5/blob/main/config.json"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 72,
+      "lessonTitle": "February 2026 roundup: which releases need new code?",
+      "lessonSlug": "february-2026-which-releases-need-new-code",
+      "kind": "survey",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Dated comparison across multiple February 2026 releases",
+        "Classify which designs need new operators; no single-model architecture or preset"
+      ],
+      "sources": [
+        {
+          "title": "The Big LLM Architecture Comparison, sections 21–23",
+          "url": "https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison"
+        },
+        {
+          "title": "Kimi K2.5 repository and model summary",
+          "url": "https://github.com/MoonshotAI/Kimi-K2.5"
+        },
+        {
+          "title": "Tiny Aya model collection",
+          "url": "https://huggingface.co/collections/CohereLabs/tiny-aya"
+        },
+        {
+          "title": "Tiny Aya Earth card",
+          "url": "https://huggingface.co/CohereLabs/tiny-aya-earth"
+        },
+        {
+          "title": "Ring 2.5 1T model card",
+          "url": "https://huggingface.co/inclusionAI/Ring-2.5-1T"
+        },
+        {
+          "title": "GLM-5 technical report",
+          "url": "https://arxiv.org/abs/2602.15763"
+        }
+      ]
+    },
+    {
+      "lessonNumber": 73,
+      "lessonTitle": "Gemma 4: what changed after Gemma 3?",
+      "lessonSlug": "gemma-4-what-changed-after-gemma-3",
+      "kind": "model_family_case_study",
+      "implementationStatus": "documented_pending",
+      "runnablePreset": null,
+      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "definingMechanisms": [
+        "Published Gemma 4 versus Gemma 3 architecture diff",
+        "Test mechanisms only where the source-backed specification changed"
+      ],
+      "sources": [
+        {
+          "title": "Gemma 4 Technical Report",
+          "url": "https://arxiv.org/abs/2607.02770"
+        },
+        {
+          "title": "Gemma 3 Technical Report",
+          "url": "https://arxiv.org/abs/2503.19786"
+        },
+        {
+          "title": "gemma-4-31B configuration",
+          "url": "https://huggingface.co/google/gemma-4-31B/blob/main/config.json"
+        }
+      ]
+    }
+  ]
+}
