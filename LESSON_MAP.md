@@ -1,15 +1,15 @@
 # Lectures 51–73: architecture case-study project map
 
-This map follows the proposed `CURRICULUM_V2_PLAN.md` order. **Tiny text path** means only the listed teaching mechanisms are executable here; it does not mean the published model is reproduced. **Not implemented** means there is no preset or operator for that case study in this starter. It is not a claim that a cited model is impossible or undocumented. Primary sources beyond the two runnable families require case-by-case curation before adding presets.
+This map follows the proposed `CURRICULUM_V2_PLAN.md` order. **Tiny text path** means only the listed teaching mechanisms are executable here; it does not mean the published model is reproduced. **Not implemented** means there is no preset or operator for that case study in this starter. It is not a claim that a cited model is impossible or undocumented. Primary sources beyond the five runnable paths require case-by-case curation before adding presets.
 
 | # | Case study | Project state | Next required work |
 | --- | --- | --- | --- |
-| 51 | DeepSeek V3 and R1 | Not implemented | MLA, fine-grained MoE, MTP, and separate R1 post-training account. [V3 report](https://arxiv.org/abs/2412.19437). |
+| 51 | DeepSeek V3 and R1 | **Tiny V3-style text path** | Low-rank MLA with decoupled RoPE and sigmoid top-k/shared-expert MoE run; no MTP, cache decode, expert balancing, distributed training, or R1 post-training. [V3 report](https://arxiv.org/abs/2412.19437). |
 | 52 | OLMo 2 | **Tiny text path** | Official tokenizer/config audit, z-loss/training recipe, cache parity and evaluation. [Report](https://arxiv.org/abs/2501.00656). |
 | 53 | Gemma 3 | **Tiny text path** | Vision path, real tokenizer/config, optimized rolling cache, official local span and evaluation. [Report](https://arxiv.org/abs/2503.19786). |
-| 54 | Mistral Small 3.1 | Not implemented | Source-backed text spec and tokenizer audit. |
+| 54 | Mistral Small 3.1 | **Tiny text path** | Vision/Tekken tokenizer, official config dimensions, cache parity and evaluation. [Config](https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/blob/main/config.json). |
 | 55 | Llama 4 | Not implemented | Published MoE/attention operator audit and text spec. |
-| 56 | Qwen3 | Not implemented | Dense and MoE presets, routing and source-backed dimensions. |
+| 56 | Qwen3 | **Tiny dense text path** | MoE routing, official dimensions/tokenizer, cache parity and evaluation. [Qwen3-0.6B config](https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/config.json). |
 | 57 | SmolLM3 | Not implemented | Published NoPE/position schedule and exact tests. |
 | 58 | Kimi K2 and K2 Thinking | Not implemented | Architecture-versus-post-training comparison; source audit. |
 | 59 | GPT-OSS | Not implemented | Published MoE routing and attention spec. |
@@ -28,4 +28,4 @@ This map follows the proposed `CURRICULUM_V2_PLAN.md` order. **Tiny text path** 
 | 72 | February 2026 roundup | Not implemented | A dated, sourced comparison table; no fictitious single model preset. |
 | 73 | Gemma 4 | Not implemented | Published differences from Gemma 3 and new-mechanism tests. |
 
-For each future family, accept a preset only when its primary paper or official configuration supports the named choices, the code includes missing operators, and tests cover shapes, forward/backward, causal behavior, cache parity, and one short train step. “Not implemented” remains the honest state until those checks exist.
+For each future family, accept a preset only when its primary paper or official configuration supports the named choices, the code includes the distinguishing operators, and tests cover shapes, forward/backward, causal behavior, and one short train step. Cache parity becomes a separate requirement when an actual decode cache is added. “Not implemented” remains the honest state until the relevant operator checks exist.

@@ -12,9 +12,9 @@
       "lessonTitle": "DeepSeek V3 and R1: one architecture, different training goals",
       "lessonSlug": "deepseek-v3-r1-architecture-training-goals",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
-      "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationStatus": "runnable_tiny_text_path",
+      "runnablePreset": "deepseek_v3_style",
+      "implementationNote": "Runnable tiny V3-style text path with low-rank MLA, decoupled RoPE, three dense FFNs then sigmoid top-k routed and shared experts; not published weights, full V3 parity, or R1 post-training. No cache decode, absorbed MLA, expert load balancing, MTP, or distributed execution.",
       "definingMechanisms": [
         "MLA latent KV representation and decoupled position path",
         "Fine-grained routed experts and shared experts",
@@ -88,12 +88,12 @@
       "lessonTitle": "Mistral Small 3.1: inspect a modern dense release",
       "lessonSlug": "mistral-small-3-1-dense-release",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
-      "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationStatus": "runnable_tiny_text_path",
+      "runnablePreset": "mistral_small31",
+      "implementationNote": "Tiny text-only Mistral Small 3.1 path: global GQA, adjacent-pair RoPE, pre-norm SwiGLU, no QK norm, untied output. Not published weights, tokenizer, vision, or checkpoint-compatible dimensions.",
       "definingMechanisms": [
-        "Published dense text configuration",
-        "Tokenizer, head grouping, context and feed-forward settings require source audit"
+        "Global grouped-query attention without QK norm",
+        "Pre-norm SwiGLU and untied output; published model also has vision outside this text path"
       ],
       "sources": [
         {
@@ -107,6 +107,10 @@
         {
           "title": "Official base configuration",
           "url": "https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Base-2503/blob/main/config.json"
+        },
+        {
+          "title": "Mistral AI, official inference transformer and RoPE code",
+          "url": "https://github.com/mistralai/mistral-inference/tree/main/src/mistral_inference"
         }
       ]
     },
@@ -138,12 +142,12 @@
       "lessonTitle": "Qwen3: one family, dense and MoE variants",
       "lessonSlug": "qwen3-one-family-dense-and-moe-variants",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
-      "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationStatus": "runnable_tiny_text_path",
+      "runnablePreset": "qwen3_dense",
+      "implementationNote": "Tiny Qwen3 dense-only text path: headwise QK norm, GQA, split-half RoPE, pre-norm SwiGLU. Not published weights, tokenizer, MoE, or checkpoint-compatible dimensions.",
       "definingMechanisms": [
-        "Compare dense and sparse variants within the Qwen3 family",
-        "Routed-expert count versus active compute; audit official configurations"
+        "Runnable dense GQA with headwise QK norm and split-half RoPE",
+        "Compare source-documented MoE variant as an unimplemented research target"
       ],
       "sources": [
         {
@@ -161,6 +165,10 @@
         {
           "title": "Qwen, *Qwen3-30B-A3B model card*, accessed 2026",
           "url": "https://huggingface.co/Qwen/Qwen3-30B-A3B"
+        },
+        {
+          "title": "Qwen, Qwen3-0.6B official configuration",
+          "url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/config.json"
         }
       ]
     },

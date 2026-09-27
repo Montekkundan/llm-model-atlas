@@ -13,7 +13,7 @@ from .spec import load_preset
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("family", choices=("olmo2", "gemma3"))
+    parser.add_argument("family", choices=("olmo2", "gemma3", "mistral_small31", "qwen3_dense", "deepseek_v3_style"))
     parser.add_argument("--steps", type=int, default=2)
     args = parser.parse_args()
     if args.steps < 1:

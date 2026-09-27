@@ -33,15 +33,15 @@ class CatalogTests(unittest.TestCase):
     def test_only_actual_tiny_paths_claim_runnable_status(self):
         cards = json.loads(CATALOG.read_text())["cards"]
         runnable = [card for card in cards if card["implementationStatus"] == "runnable_tiny_text_path"]
-        self.assertEqual({card["lessonNumber"] for card in runnable}, {52, 53})
-        self.assertEqual({card["runnablePreset"] for card in runnable}, {"olmo2", "gemma3"})
-        self.assertEqual({path.stem for path in (ROOT / "presets").glob("*.json")}, {"olmo2", "gemma3"})
+        self.assertEqual({card["lessonNumber"] for card in runnable}, {51, 52, 53, 54, 56})
+        self.assertEqual({card["runnablePreset"] for card in runnable}, {"deepseek_v3_style", "olmo2", "gemma3", "mistral_small31", "qwen3_dense"})
+        self.assertEqual({path.stem for path in (ROOT / "presets").glob("*.json")}, {"deepseek_v3_style", "olmo2", "gemma3", "mistral_small31", "qwen3_dense"})
         for card in runnable:
             with self.subTest(preset=card["runnablePreset"]):
                 self.assertIsNotNone(load_preset(card["runnablePreset"]))
-                self.assertIn("not published weights", card["implementationNote"])
+                self.assertIn("not published weights", card["implementationNote"].lower())
         for card in cards:
-            if card["lessonNumber"] in {52, 53}:
+            if card["lessonNumber"] in {51, 52, 53, 54, 56}:
                 continue
             with self.subTest(pending=card["lessonNumber"]):
                 self.assertEqual(card["implementationStatus"], "documented_pending")

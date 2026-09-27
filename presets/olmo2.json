@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 4,
   "family": "olmo2_text_tiny",
   "source_url": "https://arxiv.org/abs/2501.00656",
   "source_revision": "2 OLMo 2 Furious, Section 2.1 and Section 3.3.2; MHA-sized teaching path",
@@ -9,14 +9,27 @@
   "layers": 2,
   "query_heads": 4,
   "kv_heads": 4,
+  "head_dim": 8,
   "ff_hidden": 64,
   "max_context": 32,
-  "attention_schedule": ["global", "global"],
+  "attention_schedule": [
+    "global",
+    "global"
+  ],
   "local_window": null,
   "rope_base_global": 500000.0,
   "rope_base_local": 500000.0,
   "block_style": "reordered_output_norm",
   "qk_norm": true,
   "qk_norm_axis": "projection",
-  "gate_activation": "silu"
+  "gate_activation": "silu",
+  "rope_layout": "adjacent",
+  "norm_eps": 1e-06,
+  "tie_embeddings": true,
+  "mla_q_rank": null,
+  "mla_kv_rank": null,
+  "mla_rope_dim": null,
+  "moe_experts": null,
+  "moe_top_k": null,
+  "moe_shared_experts": null
 }

@@ -5,18 +5,19 @@ import torch
 from torch.nn import functional as F
 
 from atlas import ModelSpec, TinyLanguageModel, cache_bytes, causal_window_mask, load_preset
-from atlas.model import GroupedAttention, RMSNorm, apply_rope
+from atlas.model import GroupedAttention, LatentAttention, RMSNorm, RoutedMoE, apply_rope
 
 
 class AtlasTests(unittest.TestCase):
     def setUp(self):
         torch.manual_seed(73)
 
-    def test_two_distinct_source_backed_specs(self):
+    def test_four_distinct_source_backed_specs(self):
         olmo = load_preset("olmo2")
         gemma = load_preset("gemma3")
-        self.assertEqual(olmo.schema_version, 2)
-        self.assertEqual(gemma.schema_version, 2)
+        mistral = load_preset("mistral_small31")
+        qwen = load_preset("qwen3_dense")
+        self.assertEqual({spec.schema_version for spec in (olmo, gemma, mistral, qwen)}, {4})
         self.assertEqual(olmo.block_style, "reordered_output_norm")
         self.assertEqual(gemma.block_style, "pre_and_post_norm")
         self.assertEqual(olmo.attention_schedule, ("global", "global"))
@@ -25,13 +26,19 @@ class AtlasTests(unittest.TestCase):
         self.assertEqual((gemma.query_heads, gemma.kv_heads), (4, 2))
         self.assertEqual((olmo.qk_norm_axis, olmo.gate_activation), ("projection", "silu"))
         self.assertEqual((gemma.qk_norm_axis, gemma.gate_activation), ("head", "gelu"))
+        self.assertEqual((mistral.block_style, mistral.qk_norm_axis, mistral.rope_layout), ("pre_norm", "none", "adjacent"))
+        self.assertEqual((qwen.block_style, qwen.qk_norm_axis, qwen.rope_layout), ("pre_norm", "head", "half"))
+        self.assertEqual(mistral.query_heads * mistral.head_dim, 24)
+        self.assertEqual(qwen.query_heads * qwen.head_dim, 48)
+        self.assertFalse(mistral.tie_embeddings)
+        self.assertTrue(qwen.tie_embeddings)
 
     def test_invalid_presets_fail_before_construction(self):
         olmo = load_preset("olmo2")
         with self.assertRaisesRegex(ValueError, "schema"):
             replace(olmo, schema_version=1).validate()
         with self.assertRaisesRegex(ValueError, "head width"):
-            replace(olmo, width=33).validate()
+            replace(olmo, head_dim=7).validate()
         with self.assertRaisesRegex(ValueError, "schedule"):
             replace(olmo, attention_schedule=("global",)).validate()
         with self.assertRaisesRegex(ValueError, "MHA"):
@@ -46,8 +53,21 @@ class AtlasTests(unittest.TestCase):
             replace(load_preset("gemma3"), gate_activation="silu").validate()
         with self.assertRaisesRegex(ValueError, "QK norm"):
             replace(olmo, qk_norm_axis="invalid").validate()
+        with self.assertRaisesRegex(ValueError, "QK norm flag"):
+            replace(load_preset("mistral_small31"), qk_norm=True).validate()
+        with self.assertRaisesRegex(ValueError, "RoPE"):
+            replace(load_preset("qwen3_dense"), rope_layout="adjacent").validate()
+        with self.assertRaisesRegex(ValueError, "positive"):
+            replace(load_preset("mistral_small31"), norm_eps=0).validate()
         with self.assertRaises(ValueError):
-            load_preset("deepseek_v3")
+            load_preset("unknown_family")
+        deepseek = load_preset("deepseek_v3_style")
+        with self.assertRaisesRegex(ValueError, "three dense layers"):
+            replace(deepseek, layers=3, attention_schedule=("global",) * 3).validate()
+        with self.assertRaisesRegex(ValueError, "MoE top-k"):
+            replace(deepseek, moe_top_k=5).validate()
+        with self.assertRaisesRegex(ValueError, "only belong"):
+            replace(olmo, moe_experts=4).validate()
         raw = dict(vars(olmo), unexpected_field=True)
         with self.assertRaisesRegex(ValueError, "spec fields differ"):
             ModelSpec.from_dict(raw)
@@ -64,8 +84,21 @@ class AtlasTests(unittest.TestCase):
 
     def test_rope_preserves_head_norm(self):
         x = torch.randn(2, 7, 4, 8)
-        rotated = apply_rope(x, 500000.0)
-        torch.testing.assert_close(rotated.norm(dim=-1), x.norm(dim=-1), rtol=1e-5, atol=1e-5)
+        for layout in ("adjacent", "half"):
+            rotated = apply_rope(x, 500000.0, layout)
+            torch.testing.assert_close(rotated.norm(dim=-1), x.norm(dim=-1), rtol=1e-5, atol=1e-5)
+        self.assertFalse(torch.allclose(apply_rope(x, 500000.0, "adjacent"),
+                                        apply_rope(x, 500000.0, "half")))
+        for layout in ("adjacent", "half"):
+            self.assertEqual(apply_rope(x.to(torch.bfloat16), 500000.0, layout).dtype, torch.bfloat16)
+
+        basis = torch.zeros(1, 2, 1, 4)
+        basis[0, 1, 0] = torch.tensor([1.0, 0.0, 0.0, 0.0])
+        angle = torch.tensor(1.0)
+        adjacent = apply_rope(basis, 10000.0, "adjacent")[0, 1, 0]
+        half = apply_rope(basis, 10000.0, "half")[0, 1, 0]
+        torch.testing.assert_close(adjacent, torch.tensor([angle.cos(), angle.sin(), 0.0, 0.0]))
+        torch.testing.assert_close(half, torch.tensor([angle.cos(), 0.0, angle.sin(), 0.0]))
 
     def test_family_specific_qk_normalization_axes(self):
         olmo = GroupedAttention(load_preset("olmo2"), "global")
@@ -79,10 +112,15 @@ class AtlasTests(unittest.TestCase):
         normalized = olmo.q_norm(projected)
         expected = projected * torch.rsqrt(projected.square().mean(-1, keepdim=True) + olmo.q_norm.eps)
         torch.testing.assert_close(normalized, expected)
+        mistral = GroupedAttention(load_preset("mistral_small31"), "global")
+        self.assertIsInstance(mistral.q_norm, torch.nn.Identity)
+        self.assertIsInstance(mistral.k_norm, torch.nn.Identity)
 
     def test_family_specific_gated_mlp_activation(self):
         for family, gate_activation in (("olmo2", lambda x: F.silu(x)),
-                                        ("gemma3", lambda x: F.gelu(x, approximate="tanh"))):
+                                        ("gemma3", lambda x: F.gelu(x, approximate="tanh")),
+                                        ("mistral_small31", lambda x: F.silu(x)),
+                                        ("qwen3_dense", lambda x: F.silu(x))):
             with self.subTest(family=family):
                 ffn = TinyLanguageModel(load_preset(family)).blocks[0].ffn
                 x = torch.randn(2, 3, ffn.gate.in_features)
@@ -101,8 +139,8 @@ class AtlasTests(unittest.TestCase):
         global_last = global_attention(x)[:, -1]
         self.assertGreater((local_last - global_last).abs().max().item(), 1e-6)
 
-    def test_both_tiny_models_forward_backward_and_causality(self):
-        for name in ("olmo2", "gemma3"):
+    def test_tiny_models_forward_backward_and_causality(self):
+        for name in ("olmo2", "gemma3", "mistral_small31", "qwen3_dense"):
             with self.subTest(family=name):
                 spec = load_preset(name)
                 model = TinyLanguageModel(spec)
@@ -110,6 +148,10 @@ class AtlasTests(unittest.TestCase):
                     self.assertIsInstance(model.blocks[0].attention_input_norm, torch.nn.Identity)
                 else:
                     self.assertIsInstance(model.blocks[0].attention_input_norm, RMSNorm)
+                if name in {"mistral_small31", "qwen3_dense"}:
+                    self.assertIsInstance(model.blocks[0].attention_output_norm, torch.nn.Identity)
+                if name == "mistral_small31":
+                    self.assertIsNot(model.embedding.weight, model.lm_head.weight)
                 ids = torch.randint(spec.vocab_size, (2, 6))
                 logits = model(ids)
                 self.assertEqual(tuple(logits.shape), (2, 6, spec.vocab_size))
@@ -138,6 +180,48 @@ class AtlasTests(unittest.TestCase):
         self.assertLess(cache_bytes(gemma, 1, 32, 4), cache_bytes(olmo, 1, 32, 4))
         with self.assertRaises(ValueError):
             cache_bytes(gemma, 1, 0, 4)
+
+    def test_deepseek_style_mla_moe_shapes_gradients_and_causality(self):
+        spec = load_preset("deepseek_v3_style")
+        model = TinyLanguageModel(spec)
+        self.assertTrue(all(isinstance(block.attention, LatentAttention) for block in model.blocks))
+        self.assertTrue(all(not isinstance(block.ffn, RoutedMoE) for block in model.blocks[:3]))
+        self.assertIsInstance(model.blocks[3].ffn, RoutedMoE)
+        ids = torch.randint(spec.vocab_size, (2, 6))
+        logits = model(ids)
+        self.assertEqual(tuple(logits.shape), (2, 6, spec.vocab_size))
+        self.assertTrue(torch.isfinite(logits).all().item())
+        loss = F.cross_entropy(logits.reshape(-1, spec.vocab_size), ids.reshape(-1))
+        loss.backward()
+        attention = model.blocks[0].attention
+        moe = model.blocks[3].ffn
+        for projection in (attention.q_down, attention.q_up, attention.kv_down,
+                           attention.kv_up, moe.router):
+            self.assertIsNotNone(projection.weight.grad)
+            self.assertGreater(projection.weight.grad.abs().sum().item(), 0)
+        self.assertGreater(sum(expert.gate.weight.grad is not None
+                               for expert in moe.routed_experts), 0)
+        self.assertIsNotNone(moe.shared_experts[0].gate.weight.grad)
+        weights, indices = moe.route(torch.randn(7, spec.width))
+        self.assertEqual(tuple(weights.shape), (7, spec.moe_top_k))
+        self.assertEqual(tuple(indices.shape), (7, spec.moe_top_k))
+        torch.testing.assert_close(weights.sum(dim=-1), torch.ones(7))
+        altered = ids.clone()
+        altered[:, -1] = (altered[:, -1] + 1) % spec.vocab_size
+        with torch.no_grad():
+            torch.testing.assert_close(model(ids)[:, :-1], model(altered)[:, :-1], rtol=0, atol=1e-6)
+        self.assertEqual(cache_bytes(spec, 1, 32, 4), 4 * 32 * (12 + 4) * 4)
+
+    def test_deepseek_style_routes_top_k_and_runs_optimizer_step(self):
+        spec = load_preset("deepseek_v3_style")
+        model = TinyLanguageModel(spec)
+        ids = torch.randint(spec.vocab_size, (2, 7))
+        optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
+        before = model.blocks[3].ffn.router.weight.detach().clone()
+        logits = model(ids[:, :-1])
+        F.cross_entropy(logits.reshape(-1, spec.vocab_size), ids[:, 1:].reshape(-1)).backward()
+        optimizer.step()
+        self.assertFalse(torch.equal(before, model.blocks[3].ffn.router.weight))
 
 
 if __name__ == "__main__":
