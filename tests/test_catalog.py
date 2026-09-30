@@ -44,9 +44,11 @@ class CatalogTests(unittest.TestCase):
             if card["lessonNumber"] in {51, 52, 53, 54, 56}:
                 continue
             with self.subTest(pending=card["lessonNumber"]):
-                self.assertEqual(card["implementationStatus"], "documented_pending")
+                self.assertEqual(card["implementationStatus"], "runnable_reference_mechanisms")
                 self.assertIsNone(card["runnablePreset"])
-                self.assertIn("no runnable", card["implementationNote"])
+                self.assertIn("No runnable full-family preset", card["implementationNote"])
+                self.assertTrue(card["referenceOperators"])
+                self.assertEqual(card["referenceCommand"], f"python -m atlas.case_study {card['lessonNumber']}")
         self.assertEqual(next(card for card in cards if card["lessonNumber"] == 72)["kind"], "survey")
 
 

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "catalogTitle": "Model-family case studies, lectures 51–73",
+  "catalogTitle": "Model-family case studies, lectures 51\u201373",
   "curriculumSource": "m-26/content/lectures/syllabus.json, proposed curriculum snapshot of 2026-09-27",
   "statusSemantics": {
     "runnable_tiny_text_path": "An original scaled CPU teaching path is implemented; no released-model parity or checkpoint compatibility is claimed.",
-    "documented_pending": "The case study is cataloged from sources; no family-specific executable path is implemented here."
+    "runnable_reference_mechanisms": "Constituent CPU reference operators and numerical contracts run; the complete family graph, released weights, tokenizer, kernels and training recipe are not implemented."
   },
   "cards": [
     {
@@ -29,7 +29,12 @@
           "title": "DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning",
           "url": "https://arxiv.org/html/2501.12948"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "mla",
+        "bias_route"
+      ],
+      "referenceCommand": "python -m atlas.case_study 51"
     },
     {
       "lessonNumber": 52,
@@ -53,7 +58,11 @@
           "title": "Primary paper",
           "url": "https://arxiv.org/abs/1910.07467"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "norm"
+      ],
+      "referenceCommand": "python -m atlas.case_study 52"
     },
     {
       "lessonNumber": 53,
@@ -81,7 +90,11 @@
           "title": "Official implementation",
           "url": "https://github.com/google/gemma_pytorch/blob/main/gemma/model.py"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "window"
+      ],
+      "referenceCommand": "python -m atlas.case_study 53"
     },
     {
       "lessonNumber": 54,
@@ -112,16 +125,20 @@
           "title": "Mistral AI, official inference transformer and RoPE code",
           "url": "https://github.com/mistralai/mistral-inference/tree/main/src/mistral_inference"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "gqa"
+      ],
+      "referenceCommand": "python -m atlas.case_study 54"
     },
     {
       "lessonNumber": 55,
       "lessonTitle": "Llama 4: dense-to-sparse family design",
       "lessonSlug": "llama-4-dense-sparse-family",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: bias_route, position. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published sparse MoE choices",
         "Attention and multimodal versus text-only boundaries require source audit"
@@ -135,7 +152,12 @@
           "title": "Official model card",
           "url": "https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "bias_route",
+        "position"
+      ],
+      "referenceCommand": "python -m atlas.case_study 55"
     },
     {
       "lessonNumber": 56,
@@ -170,16 +192,21 @@
           "title": "Qwen, Qwen3-0.6B official configuration",
           "url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/config.json"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "gqa",
+        "softmax_route"
+      ],
+      "referenceCommand": "python -m atlas.case_study 56"
     },
     {
       "lessonNumber": 57,
       "lessonTitle": "SmolLM3: positional information need not be uniform",
       "lessonSlug": "smollm3-positional-information-need-not-be-uniform",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: position. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published positional schedule, including any documented NoPE layers",
         "Separate position choice from head and context changes"
@@ -201,16 +228,20 @@
           "title": "Hugging Face Transformers issue #43756, *SmolLM3 drops 3/4 RoPE layers while 1/4 is intended*, 2026",
           "url": "https://github.com/huggingface/transformers/issues/43756"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "position"
+      ],
+      "referenceCommand": "python -m atlas.case_study 57"
     },
     {
       "lessonNumber": 58,
       "lessonTitle": "Kimi K2 and K2 Thinking: architecture versus reasoning recipe",
       "lessonSlug": "kimi-k2-architecture-versus-reasoning-recipe",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: mla, bias_route. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "DeepSeek-derived MLA and expert-structure comparison where documented",
         "Separate Kimi K2 base architecture from K2 Thinking post-training"
@@ -240,16 +271,21 @@
           "title": "Moonshot AI, *Kimi-K2-Thinking config.json*, accessed 2026",
           "url": "https://huggingface.co/moonshotai/Kimi-K2-Thinking/blob/main/config.json"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "mla",
+        "bias_route"
+      ],
+      "referenceCommand": "python -m atlas.case_study 58"
     },
     {
       "lessonNumber": 59,
       "lessonTitle": "GPT-OSS: inspect an open-weight MoE design",
       "lessonSlug": "gpt-oss-inspect-an-open-weight-moe-design",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: window, softmax_route, sink. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published open-weight MoE routing and attention contracts",
         "Audit released configurations before a runnable preset"
@@ -263,16 +299,22 @@
           "title": "OpenAI, *Introducing gpt-oss*, 2025",
           "url": "https://openai.com/index/introducing-gpt-oss/"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "window",
+        "softmax_route",
+        "sink"
+      ],
+      "referenceCommand": "python -m atlas.case_study 59"
     },
     {
       "lessonNumber": 60,
       "lessonTitle": "Grok 2.5: compare another sparse family",
       "lessonSlug": "grok-25-compare-another-sparse-family",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: gqa, bias_route. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Public configuration and model-card audit",
         "Expert, attention and position choices remain to be confirmed before implementation"
@@ -290,23 +332,28 @@
           "title": "xAI, *Grok-1 open release*, 2024",
           "url": "https://github.com/xai-org/grok-1"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "gqa",
+        "bias_route"
+      ],
+      "referenceCommand": "python -m atlas.case_study 60"
     },
     {
       "lessonNumber": 61,
       "lessonTitle": "GLM-4.5: architecture and training choices in one report",
       "lessonSlug": "glm-4-5-architecture-and-training",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: gqa, bias_route. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published text architecture and MoE configuration",
         "Separate structural choices from training and reasoning recipe"
       ],
       "sources": [
         {
-          "title": "GLM-4.5 Team, *GLM-4.5: Agentic, Reasoning, and Coding (ARC) Foundation Models*, 2025, §2.1 and Table 1",
+          "title": "GLM-4.5 Team, *GLM-4.5: Agentic, Reasoning, and Coding (ARC) Foundation Models*, 2025, \u00a72.1 and Table 1",
           "url": "https://arxiv.org/html/2508.06471"
         },
         {
@@ -317,16 +364,21 @@
           "title": "Z.ai, *GLM-4.5-Air checkpoint configuration*, inspected September 2026",
           "url": "https://huggingface.co/zai-org/GLM-4.5-Air/blob/main/config.json"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "gqa",
+        "bias_route"
+      ],
+      "referenceCommand": "python -m atlas.case_study 61"
     },
     {
       "lessonNumber": 62,
       "lessonTitle": "Qwen3-Next: gated DeltaNet beside attention",
       "lessonSlug": "qwen3-next-gated-deltanet-beside-attention",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: delta, state. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Hybrid gated DeltaNet recurrent state and attention schedule",
         "Multi-token prediction; test recurrent step/sequence parity before implementation claim"
@@ -348,23 +400,28 @@
           "title": "Hugging Face Transformers, *Qwen3-Next model documentation*, inspected September 2026",
           "url": "https://huggingface.co/docs/transformers/en/model_doc/qwen3_next"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "delta",
+        "state"
+      ],
+      "referenceCommand": "python -m atlas.case_study 62"
     },
     {
       "lessonNumber": 63,
       "lessonTitle": "MiniMax-M2: why choose full attention again?",
       "lessonSlug": "minimax-m2-full-attention",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: window. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published full-attention choice",
         "Compare attention cost assumptions with M1-style efficient-attention design"
       ],
       "sources": [
         {
-          "title": "MiniMax Team, *The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence*, 2026, §§2.1–2.2",
+          "title": "MiniMax Team, *The MiniMax-M2 Series: Mini Activations Unleashing Max Real-World Intelligence*, 2026, \u00a7\u00a72.1\u20132.2",
           "url": "https://arxiv.org/html/2605.26494"
         },
         {
@@ -379,46 +436,56 @@
           "title": "MiniMax pretraining team, *Why Did M2 End Up as a Full Attention Model?*, 2025",
           "url": "https://www.minimax.io/news/why-did-m2-end-up-as-a-full-attention-model"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "window"
+      ],
+      "referenceCommand": "python -m atlas.case_study 63"
     },
     {
       "lessonNumber": 64,
       "lessonTitle": "Kimi Linear: Kimi Delta Attention plus MLA",
       "lessonSlug": "kimi-linear-delta-attention-mla",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: kda, mla, state. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Kimi Delta Attention recurrent update beside MLA",
         "Hybrid schedule and inference-state parity requirement"
       ],
       "sources": [
         {
-          "title": "Kimi Team, *Kimi Linear: An Expressive, Efficient Attention Architecture*, 2025, §§3–5",
+          "title": "Kimi Team, *Kimi Linear: An Expressive, Efficient Attention Architecture*, 2025, \u00a7\u00a73\u20135",
           "url": "https://arxiv.org/html/2510.26692"
         },
         {
           "title": "Moonshot AI, *Kimi-Linear-48B-A3B-Base configuration*, inspected September 2026",
           "url": "https://huggingface.co/moonshotai/Kimi-Linear-48B-A3B-Base/blob/main/config.json"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "kda",
+        "mla",
+        "state"
+      ],
+      "referenceCommand": "python -m atlas.case_study 64"
     },
     {
       "lessonNumber": 65,
       "lessonTitle": "Olmo 3 Thinking: the base architecture and thinking stage",
       "lessonSlug": "olmo-3-thinking-base-and-post-training",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: window, norm. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Base architecture versus thinking-stage post-training",
         "Source-backed norm, attention and tokenizer configuration audit"
       ],
       "sources": [
         {
-          "title": "Team Olmo, *Olmo 3*, 2025/2026 revision, §§3–4 and Appendix Table 33",
+          "title": "Team Olmo, *Olmo 3*, 2025/2026 revision, \u00a7\u00a73\u20134 and Appendix Table 33",
           "url": "https://arxiv.org/html/2512.13961"
         },
         {
@@ -429,39 +496,49 @@
           "title": "Ai2, *Olmo-3-7B-Think checkpoint configuration*, inspected September 2026",
           "url": "https://huggingface.co/allenai/Olmo-3-7B-Think/blob/main/config.json"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "window",
+        "norm"
+      ],
+      "referenceCommand": "python -m atlas.case_study 65"
     },
     {
       "lessonNumber": 66,
       "lessonTitle": "DeepSeek V3.2: sparse attention changes the access pattern",
       "lessonSlug": "deepseek-v3-2-sparse-attention-changes-the-access-pattern",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: sparse, mla. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published sparse-attention selection/access pattern",
         "Compare selection and cache semantics against DeepSeek V3 MLA"
       ],
       "sources": [
         {
-          "title": "DeepSeek-AI, *DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models*, 2025, §2.1, Eq. 1–3",
+          "title": "DeepSeek-AI, *DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models*, 2025, \u00a72.1, Eq. 1\u20133",
           "url": "https://arxiv.org/html/2512.02556"
         },
         {
           "title": "DeepSeek-AI, *DeepSeek-V3 Technical Report*, 2024, MLA and MoE baseline",
           "url": "https://arxiv.org/abs/2412.19437"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "sparse",
+        "mla"
+      ],
+      "referenceCommand": "python -m atlas.case_study 66"
     },
     {
       "lessonNumber": 67,
       "lessonTitle": "Mistral 3: when a family reuses DeepSeek-like structure",
       "lessonSlug": "mistral-3-when-a-family-reuses-deepseek-like-structure",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: mla, bias_route. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published Mistral 3 text configuration",
         "Identify reusable DeepSeek-like operators and genuine differences through source audit"
@@ -483,89 +560,110 @@
           "title": "DeepSeek-AI, *DeepSeek-V3 Technical Report*, 2024",
           "url": "https://arxiv.org/abs/2412.19437"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "mla",
+        "bias_route"
+      ],
+      "referenceCommand": "python -m atlas.case_study 67"
     },
     {
       "lessonNumber": 68,
       "lessonTitle": "Nemotron 3 Nano and Super: Mamba-2 and latent experts",
       "lessonSlug": "nemotron-3-nano-and-super-mamba-2-and-latent-experts",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: ssm, state, latent_dispatch. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Mamba-2/recurrent sequence path where documented",
         "Latent expert routing and state contracts for Nano and Super"
       ],
       "sources": [
         {
-          "title": "NVIDIA, *Nemotron 3 Nano: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning*, 2025, §2.1 and Table 1",
+          "title": "NVIDIA, *Nemotron 3 Nano: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning*, 2025, \u00a72.1 and Table 1",
           "url": "https://arxiv.org/html/2512.20848"
         },
         {
-          "title": "NVIDIA, *Nemotron 3 Super: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning*, 2026, §2.1",
+          "title": "NVIDIA, *Nemotron 3 Super: Open, Efficient Mixture-of-Experts Hybrid Mamba-Transformer Model for Agentic Reasoning*, 2026, \u00a72.1",
           "url": "https://research.nvidia.com/labs/nemotron/files/NVIDIA-Nemotron-3-Super-Technical-Report.pdf"
         },
         {
           "title": "Tri Dao and Albert Gu, *Transformers are SSMs: Generalized Models and Efficient Algorithms Through Structured State Space Duality*, 2024",
           "url": "https://arxiv.org/abs/2405.21060"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "ssm",
+        "state",
+        "latent_dispatch"
+      ],
+      "referenceCommand": "python -m atlas.case_study 68"
     },
     {
       "lessonNumber": 69,
       "lessonTitle": "Xiaomi MiMo-V2-Flash: inspect a fast hybrid release",
       "lessonSlug": "xiaomi-mimo-v2-flash-inspect-a-fast-hybrid-release",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: window, sink. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published hybrid component schedule",
         "Audit which operators are reused and which are distinct"
       ],
       "sources": [
         {
-          "title": "Xiaomi MiMo team, *MiMo-V2-Flash Technical Report*, 2026, §2 and Eq. 1–4",
+          "title": "Xiaomi MiMo team, *MiMo-V2-Flash Technical Report*, 2026, \u00a72 and Eq. 1\u20134",
           "url": "https://arxiv.org/html/2601.02780"
         },
         {
           "title": "Joshua Ainslie et al., *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*, 2023",
           "url": "https://arxiv.org/abs/2305.13245"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "window",
+        "sink"
+      ],
+      "referenceCommand": "python -m atlas.case_study 69"
     },
     {
       "lessonNumber": 70,
       "lessonTitle": "Arcee AI Trinity Large: reconstruct another MoE design",
       "lessonSlug": "arcee-ai-trinity-large-reconstruct-another-moe-design",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: bias_route, window. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published expert routing and attention choices",
         "Compare total versus active parameter and compute conventions"
       ],
       "sources": [
         {
-          "title": "Arcee AI, *Trinity Large Technical Report*, 2026, §2.2–2.3, Eq. 11–18 and 23–28",
+          "title": "Arcee AI, *Trinity Large Technical Report*, 2026, \u00a72.2\u20132.3, Eq. 11\u201318 and 23\u201328",
           "url": "https://arxiv.org/html/2602.17004"
         },
         {
           "title": "Joshua Ainslie et al., *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints*, 2023",
           "url": "https://arxiv.org/abs/2305.13245"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "bias_route",
+        "window"
+      ],
+      "referenceCommand": "python -m atlas.case_study 70"
     },
     {
       "lessonNumber": 71,
       "lessonTitle": "GLM-5: compare a newer frontier text architecture",
       "lessonSlug": "glm-5-compare-a-newer-frontier-text-architecture",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: sparse, mla. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published GLM-5 text configuration",
         "Distinguish new mechanisms from scale or training changes"
@@ -583,23 +681,28 @@
           "title": "GLM-4.5 configuration",
           "url": "https://huggingface.co/zai-org/GLM-4.5/blob/main/config.json"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "sparse",
+        "mla"
+      ],
+      "referenceCommand": "python -m atlas.case_study 71"
     },
     {
       "lessonNumber": 72,
       "lessonTitle": "February 2026 roundup: which releases need new code?",
       "lessonSlug": "february-2026-which-releases-need-new-code",
       "kind": "survey",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: registry, delta. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Dated comparison across multiple February 2026 releases",
         "Classify which designs need new operators; no single-model architecture or preset"
       ],
       "sources": [
         {
-          "title": "The Big LLM Architecture Comparison, sections 21–23",
+          "title": "The Big LLM Architecture Comparison, sections 21\u201323",
           "url": "https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison"
         },
         {
@@ -622,16 +725,21 @@
           "title": "GLM-5 technical report",
           "url": "https://arxiv.org/abs/2602.15763"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "registry",
+        "delta"
+      ],
+      "referenceCommand": "python -m atlas.case_study 72"
     },
     {
       "lessonNumber": 73,
       "lessonTitle": "Gemma 4: what changed after Gemma 3?",
       "lessonSlug": "gemma-4-what-changed-after-gemma-3",
       "kind": "model_family_case_study",
-      "implementationStatus": "documented_pending",
+      "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Reading and implementation target only; no runnable family preset or faithful model reproduction is included.",
+      "implementationNote": "Executable constituent reference checks: key_as_value, window. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published Gemma 4 versus Gemma 3 architecture diff",
         "Test mechanisms only where the source-backed specification changed"
@@ -649,7 +757,12 @@
           "title": "gemma-4-31B configuration",
           "url": "https://huggingface.co/google/gemma-4-31B/blob/main/config.json"
         }
-      ]
+      ],
+      "referenceOperators": [
+        "key_as_value",
+        "window"
+      ],
+      "referenceCommand": "python -m atlas.case_study 73"
     }
   ]
 }
