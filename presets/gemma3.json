@@ -27,7 +27,7 @@
   "qk_norm": true,
   "qk_norm_axis": "head",
   "gate_activation": "gelu",
-  "rope_layout": "adjacent",
+  "rope_layout": "half",
   "norm_eps": 1e-06,
   "tie_embeddings": true,
   "mla_q_rank": null,
