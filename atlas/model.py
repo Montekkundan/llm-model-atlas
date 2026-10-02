@@ -12,6 +12,11 @@ from torch.nn import functional as F
 from .spec import ModelSpec
 
 
+# initializer_range of the OLMo 2, Gemma 3, Mistral Small 3.1, Qwen3 and DeepSeek-V3 configs.
+# PyTorch's defaults (N(0,1) embeddings) would give a first-step loss far above ln(vocab).
+INIT_STD = 0.02
+
+
 class RMSNorm(nn.Module):
     def __init__(self, width: int, eps: float = 1e-6):
         super().__init__()
@@ -215,6 +220,9 @@ class TinyLanguageModel(nn.Module):
         self.lm_head = nn.Linear(spec.width, spec.vocab_size, bias=False)
         if spec.tie_embeddings:
             self.lm_head.weight = self.embedding.weight
+        for parameter in self.parameters():
+            if parameter.ndim >= 2:  # matrices and embeddings; norm gains stay at one
+                nn.init.normal_(parameter, mean=0.0, std=INIT_STD)
 
     def forward(self, ids: Tensor) -> Tensor:
         if ids.ndim != 2 or not 0 < ids.shape[1] <= self.spec.max_context:
