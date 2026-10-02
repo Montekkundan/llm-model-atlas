@@ -122,8 +122,10 @@ class ModelSpec:
                 raise ValueError("OLMo 2 requires full-projection QK norm")
             if self.gate_activation != "silu":
                 raise ValueError("OLMo 2 requires SiLU gate activation")
-            if self.rope_layout != "adjacent":
-                raise ValueError("OLMo 2 preset uses adjacent-pair RoPE")
+            if self.rope_layout != "half":
+                raise ValueError("OLMo 2 preset uses split-half RoPE (rotate_half), as the reference code does")
+            if self.tie_embeddings:
+                raise ValueError("OLMo 2 1B, 7B and 32B use untied embeddings")
         if self.family == "gemma3_text_tiny":
             if self.block_style != "pre_and_post_norm" or self.attention_schedule != (
                 "local", "local", "local", "local", "local", "global"
@@ -135,8 +137,8 @@ class ModelSpec:
                 raise ValueError("Gemma 3 requires headwise QK norm")
             if self.gate_activation != "gelu":
                 raise ValueError("Gemma 3 requires GELU gate activation")
-            if self.rope_layout != "adjacent":
-                raise ValueError("Gemma 3 preset uses adjacent-pair RoPE")
+            if self.rope_layout != "half":
+                raise ValueError("Gemma 3 preset uses split-half RoPE, as the reference code does")
         if self.family == "mistral_small31_text_tiny":
             if self.block_style != "pre_norm" or set(self.attention_schedule) != {"global"}:
                 raise ValueError("Mistral Small 3.1 text path requires pre-norm and global attention")
