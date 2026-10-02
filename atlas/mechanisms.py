@@ -27,8 +27,14 @@ def position_queries_keys(q: Tensor, k: Tensor, mode: str, base: float) -> tuple
 
 
 def biased_topk_route(logits: Tensor, top_k: int, bias: Tensor | None = None,
-                      gate: str = "sigmoid") -> tuple[Tensor, Tensor]:
-    """Selection may use bias; combination weights always use original scores."""
+                      gate: str = "sigmoid", normalize: bool = True) -> tuple[Tensor, Tensor]:
+    """Selection may use bias; combination weights always use original scores.
+
+    normalize=True divides the selected scores by their sum, so top_k=1 gives a gate of
+    exactly one and the router receives no task gradient (DeepSeek-V3 normalises its
+    sigmoid affinities). normalize=False keeps the selected scores as the gates: the
+    sigmoid of the selected logit (Llama 4) or the full-softmax probability (Grok-1 code).
+    """
     if logits.ndim != 2 or not 1 <= top_k <= logits.shape[-1]:
         raise ValueError("expected [tokens,experts] logits and a valid top_k")
     if gate == "sigmoid":
@@ -42,8 +48,22 @@ def biased_topk_route(logits: Tensor, top_k: int, bias: Tensor | None = None,
     selection = scores if bias is None else scores + bias
     indices = torch.argsort(selection, dim=-1, descending=True, stable=True)[..., :top_k]
     selected = scores.gather(-1, indices)
+    if not normalize:
+        return selected, indices
     weights = selected / selected.sum(dim=-1, keepdim=True).clamp_min(torch.finfo(scores.dtype).tiny)
     return weights, indices
+
+
+def chunked_causal_mask(tokens: int, chunk: int, device: torch.device | None = None) -> Tensor:
+    """Llama 4 chunked attention: causal inside the chunk position // chunk, blind to earlier chunks.
+
+    This is not a sliding window: a query at the start of a chunk sees only itself.
+    """
+    if tokens < 1 or chunk < 1:
+        raise ValueError("tokens/chunk must be positive")
+    positions = torch.arange(tokens, device=device)
+    same_chunk = positions[:, None] // chunk == positions[None, :] // chunk
+    return same_chunk & (positions[:, None] >= positions[None, :])
 
 
 def sparse_causal_attention(q: Tensor, k: Tensor, v: Tensor, index_scores: Tensor,
