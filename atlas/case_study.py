@@ -7,8 +7,8 @@ import json
 
 import torch
 
-from .mechanisms import (HybridState, biased_topk_route, delta_scan, delta_step,
-                         key_as_value_attention, position_queries_keys,
+from .mechanisms import (HybridState, biased_topk_route, chunked_causal_mask, delta_scan,
+                         delta_step, key_as_value_attention, position_queries_keys,
                          positional_schedule, selective_ssm_step,
                          sink_attention, sparse_causal_attention)
 from .model import LatentAttention, causal_window_mask
@@ -17,9 +17,9 @@ from .spec import load_preset
 
 CASE_OPERATORS = {
     51: ("mla", "bias_route"), 52: ("norm",), 53: ("window",),
-    54: ("gqa",), 55: ("bias_route", "position"), 56: ("gqa", "softmax_route"),
+    54: ("gqa",), 55: ("top1_scaled_route", "position", "chunk"), 56: ("gqa", "softmax_route"),
     57: ("position",), 58: ("mla", "bias_route"), 59: ("window", "softmax_route", "sink"),
-    60: ("gqa", "bias_route"), 61: ("gqa", "bias_route"),
+    60: ("gqa", "softmax_all_route"), 61: ("gqa", "bias_route"),
     62: ("delta", "state"), 63: ("window",), 64: ("kda", "mla", "state"),
     65: ("window", "norm"), 66: ("sparse", "mla"), 67: ("mla", "bias_route"),
     68: ("ssm", "state", "latent_dispatch"), 69: ("window", "sink"),
@@ -27,18 +27,25 @@ CASE_OPERATORS = {
     72: ("registry", "delta"), 73: ("key_as_value", "window"),
 }
 
+# (layers, NoPE interval) for the lessons that model a published schedule: Llama 4 Scout has 48
+# layers with a global NoPE layer every fourth, SmolLM3 has 36 layers with NoPE every fourth.
+# Any other caller gets a toy ten-layer, interval-three schedule.
+POSITION_SCHEDULES = {55: (48, 4), 57: (36, 4)}
 
-def run_operator(name: str, family: str = "qwen3_dense") -> dict:
+
+def run_operator(name: str, family: str = "qwen3_dense", lesson: int | None = None) -> dict:
     torch.manual_seed(73)
     if name == "position":
-        modes = positional_schedule(10, 3)
+        layers, interval = POSITION_SCHEDULES.get(lesson, (10, 3))
+        modes = positional_schedule(layers, interval)
         q, k = torch.randn(1, 5, 2, 4), torch.randn(1, 5, 2, 4)
         rope_q, rope_k = position_queries_keys(q, k, "rope", 10000.0)
         none_q, none_k = position_queries_keys(q, k, "none", 10000.0)
         assert torch.equal(none_q, q) and torch.equal(none_k, k)
         assert not torch.allclose(rope_q, q) and not torch.allclose(rope_k, k)
         torch.testing.assert_close(rope_q.norm(dim=-1), q.norm(dim=-1))
-        return {"nope_zero_based_layers": [i for i, mode in enumerate(modes) if mode == "none"]}
+        return {"layers": layers, "interval": interval,
+                "nope_zero_based_layers": [i for i, mode in enumerate(modes) if mode == "none"]}
     if name in {"bias_route", "softmax_route"}:
         logits = torch.logit(torch.tensor([[0.6, 0.5, 0.4]], requires_grad=True))
         bias = torch.tensor([0.0, 0.2, 0.0]) if name == "bias_route" else None
@@ -49,6 +56,34 @@ def run_operator(name: str, family: str = "qwen3_dense") -> dict:
             assert selected.tolist() == [[1, 0]]
             torch.testing.assert_close(weights, torch.tensor([[5 / 11, 6 / 11]]))
         return {"selected": selected.tolist(), "gates": [[round(x, 6) for x in weights[0].tolist()]]}
+    if name == "top1_scaled_route":
+        # Llama 4 text router: top-1 of 16 routed experts (a shared expert runs for every token);
+        # the sigmoid of the selected logit is the gate and is not renormalised.
+        logits = torch.randn(6, 16, requires_grad=True)
+        weights, selected = biased_topk_route(logits, 1, None, "sigmoid", normalize=False)
+        torch.testing.assert_close(weights.squeeze(-1), logits.max(-1).values.sigmoid())
+        assert selected.shape == (6, 1) and (weights < 1).all()
+        weights.sum().backward()
+        assert logits.grad.abs().sum() > 0
+        unit, _ = biased_topk_route(logits.detach(), 1)
+        assert torch.equal(unit, torch.ones_like(unit))
+        return {"experts": 16, "top_k": 1, "gate_below_one": True, "router_gradient_nonzero": True,
+                "normalized_top1_gate_is_one": True}
+    if name == "softmax_all_route":
+        # Grok-1/2 style: softmax over all 8 experts, top-2, gate = full probability (not renormalised).
+        logits = torch.randn(5, 8)
+        weights, selected = biased_topk_route(logits, 2, None, "softmax", normalize=False)
+        torch.testing.assert_close(weights, logits.softmax(-1).gather(-1, selected))
+        assert (weights.sum(-1) < 1).all()
+        renormalized, _ = biased_topk_route(logits, 2, None, "softmax")
+        torch.testing.assert_close(renormalized.sum(-1), torch.ones(5))
+        return {"experts": 8, "top_k": 2, "gate_sum_below_one": True}
+    if name == "chunk":
+        mask = chunked_causal_mask(10, 4)
+        assert mask[5].nonzero().flatten().tolist() == [4, 5]
+        assert mask[8].nonzero().flatten().tolist() == [8]
+        assert not mask[0, 1] and not mask[4, 3]
+        return {"chunk": 4, "chunk_keys_at_5": [4, 5], "global_nope_keys_at_5": list(range(6))}
     if name == "window":
         mask = causal_window_mask(7, 4)
         assert mask[5].nonzero().flatten().tolist() == [2, 3, 4, 5]
@@ -183,7 +218,7 @@ def run_case(lesson: int) -> dict:
     if lesson not in CASE_OPERATORS:
         raise ValueError("choose a lesson number from 51 through 73")
     return {"lesson": lesson, "scope": "constituent_operator_checks_not_full_family_port",
-            "checks": {name: run_operator(name, "mistral_small31" if lesson == 54 else "qwen3_dense")
+            "checks": {name: run_operator(name, "mistral_small31" if lesson == 54 else "qwen3_dense", lesson)
                        for name in CASE_OPERATORS[lesson]}}
 
 
