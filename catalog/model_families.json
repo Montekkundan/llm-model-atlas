@@ -84,11 +84,11 @@
         },
         {
           "title": "Official configuration",
-          "url": "https://github.com/google/gemma_pytorch/blob/main/gemma/config.py"
+          "url": "https://github.com/google/gemma_pytorch/blob/014acb7ac4563a5f77c76d7ff98f31b568c16508/gemma/config.py"
         },
         {
           "title": "Official implementation",
-          "url": "https://github.com/google/gemma_pytorch/blob/main/gemma/model.py"
+          "url": "https://github.com/google/gemma_pytorch/blob/014acb7ac4563a5f77c76d7ff98f31b568c16508/gemma/model.py"
         }
       ],
       "referenceOperators": [
@@ -115,7 +115,7 @@
         },
         {
           "title": "Official released configuration",
-          "url": "https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/blob/main/config.json"
+          "url": "https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/blob/68faf511d618ef198fef186659617cfd2eb8e33a/config.json"
         },
         {
           "title": "Official base configuration",
@@ -123,7 +123,7 @@
         },
         {
           "title": "Mistral AI, official inference transformer and RoPE code",
-          "url": "https://github.com/mistralai/mistral-inference/tree/main/src/mistral_inference"
+          "url": "https://github.com/mistralai/mistral-inference/tree/9eaeb91c17450e09021b6065a1d5cc69876507c8/src/mistral_inference"
         }
       ],
       "referenceOperators": [
@@ -138,9 +138,10 @@
       "kind": "model_family_case_study",
       "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Executable constituent reference checks: bias_route, position. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
+      "implementationNote": "Executable constituent reference checks: top1_scaled_route, position, chunk. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work. The position check uses Scout's 48 layers with a NoPE layer every fourth; the other two checks use toy sizes (16 experts, chunk 4).",
       "definingMechanisms": [
-        "Published sparse MoE choices",
+        "Scout text path: 16 routed experts with top-1 routing plus a shared expert; the sigmoid of the selected router logit is the gate and is not renormalised (not DeepSeek's normalised sigmoid with selection bias)",
+        "iRoPE layout: chunked attention (chunk 8192, not a sliding window) with RoPE on three of every four layers and a global NoPE layer every fourth (48 layers for Scout)",
         "Attention and multimodal versus text-only boundaries require source audit"
       ],
       "sources": [
@@ -150,12 +151,25 @@
         },
         {
           "title": "Official model card",
-          "url": "https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md"
+          "url": "https://github.com/meta-llama/llama-models/blob/0e0b8c519242d5833d8c11bffc1232b77ad7f301/models/llama4/MODEL_CARD.md"
+        },
+        {
+          "title": "Meta llama-models, Llama 4 reference model code (nope_layer_interval, attention_chunk_size), pinned commit",
+          "url": "https://github.com/meta-llama/llama-models/blob/0e0b8c519242d5833d8c11bffc1232b77ad7f301/models/llama4/model.py"
+        },
+        {
+          "title": "Hugging Face Transformers, Llama4TextConfig defaults (16 experts, 1 per token, chunk 8192, NoPE interval 4), pinned commit",
+          "url": "https://github.com/huggingface/transformers/blob/35dff0957a99d50eaf85d7852a96fd29e59052d6/src/transformers/models/llama4/configuration_llama4.py"
+        },
+        {
+          "title": "Hugging Face Transformers, Llama4 router (top-k, then sigmoid) and shared expert, pinned commit",
+          "url": "https://github.com/huggingface/transformers/blob/35dff0957a99d50eaf85d7852a96fd29e59052d6/src/transformers/models/llama4/modeling_llama4.py"
         }
       ],
       "referenceOperators": [
-        "bias_route",
-        "position"
+        "top1_scaled_route",
+        "position",
+        "chunk"
       ],
       "referenceCommand": "python -m atlas.case_study 55"
     },
@@ -190,7 +204,7 @@
         },
         {
           "title": "Qwen, Qwen3-0.6B official configuration",
-          "url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/config.json"
+          "url": "https://huggingface.co/Qwen/Qwen3-0.6B/blob/c1899de289a04d12100db370d81485cdf75e47ca/config.json"
         }
       ],
       "referenceOperators": [
@@ -206,7 +220,7 @@
       "kind": "model_family_case_study",
       "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Executable constituent reference checks: position. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
+      "implementationNote": "Executable constituent reference checks: position. The check uses SmolLM3's published schedule, 36 layers with a NoPE layer every fourth (zero-based 3, 7, ..., 35). No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
         "Published positional schedule, including any documented NoPE layers",
         "Separate position choice from head and context changes"
@@ -314,10 +328,10 @@
       "kind": "model_family_case_study",
       "implementationStatus": "runnable_reference_mechanisms",
       "runnablePreset": null,
-      "implementationNote": "Executable constituent reference checks: gqa, bias_route. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
+      "implementationNote": "Executable constituent reference checks: gqa, softmax_all_route. No runnable full-family preset or published checkpoint compatibility; source-specific composition, dimensions, trained weights, tokenizer, post-training and optimized kernels remain separate porting work.",
       "definingMechanisms": [
-        "Public configuration and model-card audit",
-        "Expert, attention and position choices remain to be confirmed before implementation"
+        "Public configuration and model-card audit: the Grok-2 config.json lists 8 local experts with 2 per token, 64 layers, 64 query and 8 KV heads of width 128, residual_moe, and soft-capping of router and attention logits",
+        "Routing function: the model card does not document it; the Grok-1 open code applies softmax over all experts, takes the top 2 and does not renormalise the gates, which is what the softmax_all_route check follows (not DeepSeek's sigmoid with selection bias)"
       ],
       "sources": [
         {
@@ -335,7 +349,7 @@
       ],
       "referenceOperators": [
         "gqa",
-        "bias_route"
+        "softmax_all_route"
       ],
       "referenceCommand": "python -m atlas.case_study 60"
     },
