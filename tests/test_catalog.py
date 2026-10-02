@@ -6,6 +6,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from atlas import load_preset
+from atlas.case_study import CASE_OPERATORS, run_case
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -50,6 +51,22 @@ class CatalogTests(unittest.TestCase):
                 self.assertTrue(card["referenceOperators"])
                 self.assertEqual(card["referenceCommand"], f"python -m atlas.case_study {card['lessonNumber']}")
         self.assertEqual(next(card for card in cards if card["lessonNumber"] == 72)["kind"], "survey")
+
+    def test_catalog_lists_the_operators_the_case_runner_executes(self):
+        for card in json.loads(CATALOG.read_text())["cards"]:
+            with self.subTest(lesson=card["lessonNumber"]):
+                operators = list(CASE_OPERATORS[card["lessonNumber"]])
+                self.assertEqual(card["referenceOperators"], operators)
+                if card["implementationStatus"] == "runnable_reference_mechanisms":
+                    self.assertIn("checks: " + ", ".join(operators) + ".", card["implementationNote"])
+
+    def test_documented_duplicate_operator_results(self):
+        # README: these lessons print identical checks because they run the same operators.
+        groups = {}
+        for lesson in range(51, 74):
+            groups.setdefault(json.dumps(run_case(lesson)["checks"], sort_keys=True), []).append(lesson)
+        self.assertEqual(sorted(group for group in groups.values() if len(group) > 1),
+                         [[51, 58, 67], [53, 63], [66, 71]])
 
 
 if __name__ == "__main__":
