@@ -7,13 +7,13 @@ This map follows the 96-lesson course order. **Tiny text path** means only the l
 | 51 | DeepSeek V3 and R1 | **Tiny V3-style text path** | Low-rank MLA with decoupled RoPE and sigmoid top-k/shared-expert MoE run; no MTP, cache decode, expert balancing, distributed training, or R1 post-training. [V3 report](https://arxiv.org/abs/2412.19437). |
 | 52 | OLMo 2 | **Tiny text path** | Official tokenizer/config audit, z-loss/training recipe, cache parity and evaluation. [Report](https://arxiv.org/abs/2501.00656). |
 | 53 | Gemma 3 | **Tiny text path** | Vision path, real tokenizer/config, optimized rolling cache, official local span and evaluation. [Report](https://arxiv.org/abs/2503.19786). |
-| 54 | Mistral Small 3.1 | **Tiny text path** | Vision/Tekken tokenizer, official config dimensions, cache parity and evaluation. [Config](https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/blob/main/config.json). |
-| 55 | Llama 4 | Reference operators | Published MoE/attention operator audit and text spec. |
-| 56 | Qwen3 | **Tiny dense text path** | MoE routing, official dimensions/tokenizer, cache parity and evaluation. [Qwen3-0.6B config](https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/config.json). |
-| 57 | SmolLM3 | Reference operators | Published NoPE/position schedule and exact tests. |
+| 54 | Mistral Small 3.1 | **Tiny text path** | Vision/Tekken tokenizer, official config dimensions, cache parity and evaluation. [Config](https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503/blob/68faf511d618ef198fef186659617cfd2eb8e33a/config.json). |
+| 55 | Llama 4 | Reference operators | Top-1 of 16 sigmoid-gated routing (unnormalised), the 48-layer NoPE-every-fourth schedule and a chunked mask run; shared-expert MoE layer, attention temperature tuning, dimensions and a text spec remain. |
+| 56 | Qwen3 | **Tiny dense text path** | MoE routing, official dimensions/tokenizer, cache parity and evaluation. [Qwen3-0.6B config](https://huggingface.co/Qwen/Qwen3-0.6B/blob/c1899de289a04d12100db370d81485cdf75e47ca/config.json). |
+| 57 | SmolLM3 | Reference operators | The 36-layer, every-fourth-layer NoPE schedule runs (zero-based 3, 7, ..., 35); a full graph with exact tests remains. |
 | 58 | Kimi K2 and K2 Thinking | Reference operators | Architecture-versus-post-training comparison; source audit. |
 | 59 | GPT-OSS | Reference operators | Published MoE routing and attention spec. |
-| 60 | Grok 2.5 | Reference operators | Public-detail audit before claiming a faithful preset. |
+| 60 | Grok 2.5 | Reference operators | Softmax-over-all-experts, top-2-of-8 unnormalised gate (Grok-1 code) runs; router and attention soft-capping, residual MoE and a public-detail audit remain. |
 | 61 | GLM-4.5 | Reference operators | Published text path and training/structure separation. |
 | 62 | Qwen3-Next | Reference operators | DeltaNet/recurrent state, hybrid schedule and MTP tests. |
 | 63 | MiniMax-M2 | Reference operators | Source-backed full-attention architecture and cost comparison. |
