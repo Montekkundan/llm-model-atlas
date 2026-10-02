@@ -2,8 +2,8 @@ import unittest
 
 import torch
 
-from atlas.case_study import CASE_OPERATORS, run_case
-from atlas.mechanisms import (HybridState, biased_topk_route, delta_step,
+from atlas.case_study import CASE_OPERATORS, run_case, run_operator
+from atlas.mechanisms import (HybridState, biased_topk_route, chunked_causal_mask, delta_step,
                               key_as_value_attention, selective_ssm_step,
                               sink_attention, sparse_causal_attention)
 from atlas.model import causal_window_mask
@@ -22,6 +22,45 @@ class MechanismTests(unittest.TestCase):
         torch.testing.assert_close(w, w2)
         _, ties = biased_topk_route(torch.zeros(2, 4), 2)
         self.assertEqual(ties.tolist(), [[0, 1], [0, 1]])
+
+    def test_unnormalized_gates_keep_the_selected_score_and_train_a_top1_router(self):
+        # Llama 4: sigmoid of the selected logit is the gate. Grok-1 code: full-softmax probability.
+        logits = torch.randn(5, 16, requires_grad=True)
+        weights, _ = biased_topk_route(logits, 1, None, "sigmoid", normalize=False)
+        torch.testing.assert_close(weights.squeeze(-1), logits.max(-1).values.sigmoid())
+        weights.sum().backward()
+        self.assertGreater(logits.grad.abs().sum().item(), 0)
+        normalized = torch.randn(5, 16, requires_grad=True)
+        unit, _ = biased_topk_route(normalized, 1)
+        self.assertTrue(torch.equal(unit, torch.ones_like(unit)))
+        unit.sum().backward()
+        self.assertLess(normalized.grad.abs().max().item(), 1e-6)  # DeepSeek-style top-1 gate carries no signal
+        scores = torch.randn(4, 8)
+        gates, picks = biased_topk_route(scores, 2, None, "softmax", normalize=False)
+        torch.testing.assert_close(gates, scores.softmax(-1).gather(-1, picks))
+        self.assertTrue((gates.sum(-1) < 1).all())
+        renormalized, _ = biased_topk_route(scores, 2, None, "softmax")
+        torch.testing.assert_close(renormalized.sum(-1), torch.ones(4))
+
+    def test_chunked_mask_is_block_local_and_not_a_sliding_window(self):
+        mask = chunked_causal_mask(10, 4)
+        self.assertEqual([mask[row].nonzero().flatten().tolist() for row in (0, 4, 5, 7, 9)],
+                         [[0], [4], [4, 5], [4, 5, 6, 7], [8, 9]])
+        self.assertEqual(causal_window_mask(10, 4)[4].nonzero().flatten().tolist(), [1, 2, 3, 4])
+        with self.assertRaises(ValueError):
+            chunked_causal_mask(10, 0)
+
+    def test_published_nope_schedules_replace_the_toy_for_llama4_and_smollm3(self):
+        smollm3 = run_case(57)["checks"]["position"]
+        self.assertEqual(smollm3, {"layers": 36, "interval": 4, "nope_zero_based_layers": list(range(3, 36, 4))})
+        self.assertEqual(len(smollm3["nope_zero_based_layers"]), 9)
+        llama4 = run_case(55)["checks"]["position"]
+        self.assertEqual((llama4["layers"], llama4["interval"]), (48, 4))
+        self.assertEqual(llama4["nope_zero_based_layers"], list(range(3, 48, 4)))
+        self.assertEqual(run_operator("position"),
+                         {"layers": 10, "interval": 3, "nope_zero_based_layers": [2, 5, 8]})  # toy default
+        self.assertEqual(CASE_OPERATORS[55], ("top1_scaled_route", "position", "chunk"))
+        self.assertEqual(CASE_OPERATORS[60], ("gqa", "softmax_all_route"))
 
     def test_sparse_all_keys_equals_dense_with_gradients_and_causality(self):
         q, k, v = (torch.randn(2, 2, 7, 4, requires_grad=True) for _ in range(3))
